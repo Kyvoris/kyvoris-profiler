@@ -9,10 +9,14 @@ import importlib
 import json
 import os
 import sys
-import tomllib
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised on Python 3.10
+    import tomli as tomllib
 
 from kyvoris_profiler import (
     ThresholdEvaluation,

@@ -6,7 +6,7 @@ import json
 import platform
 import subprocess
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from kyvoris_profiler.metrics import ProfileSummary
@@ -52,7 +52,7 @@ def append_history_record(
 ) -> HistoryRecord:
     """Append a profile summary to a JSONL history file."""
     record = HistoryRecord(
-        timestamp=timestamp or datetime.now(UTC).isoformat(),
+        timestamp=timestamp or datetime.now(timezone.utc).isoformat(),
         label=label,
         summary=summary,
         source=source,

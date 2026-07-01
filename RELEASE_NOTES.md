@@ -1,5 +1,25 @@
 # Release Notes
 
+## 1.0.1
+
+`1.0.1` fixes Python 3.10 compatibility in CI.
+
+### Fixed
+
+- Replaced `datetime.UTC` usage with Python 3.10-compatible `timezone.utc`.
+- Added a `tomllib` fallback through `tomli` for Python 3.10.
+
+### Changed
+
+- Project metadata version is now `1.0.1`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1`
+
 ## 1.0.0
 
 `1.0.0` is the first stable Kyvoris Profiler release.

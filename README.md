@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: stable. Version `1.0.0` focuses on latency measurement,
+> Project status: stable. Version `1.0.1` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, benchmark history, and a
 > command-line interface. See

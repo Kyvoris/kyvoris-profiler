@@ -74,7 +74,7 @@ Invoke-Step "Install built wheel" {
 }
 
 Invoke-Step "Validate installed package import" {
-    & $pythonPath -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '1.0.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    & $pythonPath -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '1.0.1', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Validate installed console script" {
