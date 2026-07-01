@@ -20,6 +20,32 @@ implementation starts.
 - `release:0.6.0`
 - `release:0.7.0`
 - `release:0.7.1`
+- `release:0.8.0`
+
+## 0.8.0 Issues
+
+### Add CSV Report Format
+
+**Problem:** Users need benchmark and comparison output that opens easily in
+spreadsheet tools.
+
+**Acceptance criteria:**
+
+- Summary reports support `--format csv`.
+- Comparison reports support `--format csv`.
+- CSV formatters are exposed through the public API.
+- Tests cover formatter and CLI output behavior.
+
+### Document Report Schemas
+
+**Problem:** Automation and future dashboards need stable documentation for
+machine-readable report formats.
+
+**Acceptance criteria:**
+
+- `docs/report-schema.md` documents summary JSON and CSV.
+- `docs/report-schema.md` documents comparison JSON and CSV.
+- README links to the schema documentation.
 
 ## 0.7.1 Issues
 

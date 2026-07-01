@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.7.1', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.8.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -110,6 +110,15 @@ Invoke-Step "CLI HTML output validation" {
     Assert-FileContains "reports\cli-smoke.html" "Benchmark Results"
 }
 
+Invoke-Step "CLI CSV output smoke test" {
+    python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format csv --output reports\cli-smoke.csv
+}
+
+Invoke-Step "CLI CSV output validation" {
+    Assert-FileContains "reports\cli-smoke.csv" "metric,value"
+    Assert-FileContains "reports\cli-smoke.csv" "Average"
+}
+
 Invoke-Step "Comparison demo" {
     python examples\run_comparison_demo.py
 }
@@ -133,6 +142,15 @@ Invoke-Step "CLI comparison HTML output smoke test" {
 Invoke-Step "CLI comparison HTML output validation" {
     Assert-FileContains "reports\comparison-smoke.html" "<!doctype html>"
     Assert-FileContains "reports\comparison-smoke.html" "Benchmark Comparison"
+}
+
+Invoke-Step "CLI comparison CSV output smoke test" {
+    python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format csv --output reports\comparison-smoke.csv
+}
+
+Invoke-Step "CLI comparison CSV output validation" {
+    Assert-FileContains "reports\comparison-smoke.csv" "metric,baseline,candidate,delta,percent_change,result"
+    Assert-FileContains "reports\comparison-smoke.csv" "average_ms"
 }
 
 Invoke-Step "CLI threshold pass smoke test" {

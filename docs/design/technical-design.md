@@ -63,6 +63,12 @@ TOML is used for repeatable comparison configuration because it is readable,
 matches the existing Python packaging ecosystem, and can be parsed with the
 standard library.
 
+## 0.8.0 Design Decision
+
+CSV is added as a spreadsheet-oriented presentation format while JSON remains
+the canonical machine-readable format. CSV output is intentionally simple and
+uses the standard library so report generation remains dependency-free.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

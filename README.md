@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.7.1` focuses on latency measurement,
+> Project status: early alpha. Version `0.8.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, and a command-line
 > interface. See
@@ -28,7 +28,7 @@ measuring that repeated behavior.
 - Compare benchmark summaries across versions, branches, or implementations.
 - Enforce comparison thresholds for CI regression checks.
 - Return typed summaries instead of loosely shaped dictionaries.
-- Generate plain-text, Markdown, JSON, or HTML reports.
+- Generate plain-text, Markdown, JSON, HTML, or CSV reports.
 - Run benchmarks from the command line with `kyvoris-profiler`.
 - Keep the core package free of runtime dependencies.
 - Use the same API for simulated workloads, local models, remote endpoints, and
@@ -348,6 +348,7 @@ For a deeper explanation of every field, see [docs/metrics.md](docs/metrics.md).
 
 ```python
 from kyvoris_profiler import (
+    format_csv_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -358,12 +359,16 @@ print(format_text_report(summary))
 print(format_markdown_report(summary))
 print(format_json_report(summary))
 print(format_html_report(summary))
+print(format_csv_report(summary))
 ```
 
 `format_text_report()` is useful for terminal output. `format_markdown_report()`
 is useful for README snippets, CI comments, and benchmark artifacts.
 `format_json_report()` is useful for automation and storage. `format_html_report()`
-is useful for standalone benchmark artifacts.
+is useful for standalone benchmark artifacts. `format_csv_report()` is useful
+for spreadsheets and simple benchmark history.
+
+For machine-readable formats, see [docs/report-schema.md](docs/report-schema.md).
 
 ## Project Layout
 
@@ -377,6 +382,7 @@ kyvoris-profiler/
 |   |-- github-issues.md
 |   |-- metrics.md
 |   |-- pull-request-descriptions.md
+|   |-- report-schema.md
 |   |-- weekly-milestones.md
 |   `-- roadmap.md
 |-- examples/
@@ -437,9 +443,11 @@ $env:PYTHONPATH="src"
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --warmup 1 --collect-cpu --collect-memory
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format html --output reports\cli-smoke.html
+python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format csv --output reports\cli-smoke.csv
 python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format markdown --output reports\comparison-smoke.md
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format html --output reports\comparison-smoke.html
+python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format csv --output reports\comparison-smoke.csv
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
 python -m kyvoris_profiler compare --config kyvoris-profiler.toml --format markdown --output reports\config-comparison-smoke.md --max-regression-percent 100 --threshold-metric average_ms
 ```

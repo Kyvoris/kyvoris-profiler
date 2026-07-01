@@ -80,14 +80,20 @@ Version `0.2.0` includes JSON and HTML formatters in addition to text and
 Markdown:
 
 ```python
-from kyvoris_profiler import format_html_report, format_json_report
+from kyvoris_profiler import (
+    format_csv_report,
+    format_html_report,
+    format_json_report,
+)
 
 json_report = format_json_report(result, title="Real Model Inference Benchmark")
 html_report = format_html_report(result, title="Real Model Inference Benchmark")
+csv_report = format_csv_report(result, title="Real Model Inference Benchmark")
 ```
 
 JSON is best for automation, storage, and later comparisons. HTML is best for
-sharing a standalone benchmark artifact with teammates.
+sharing a standalone benchmark artifact with teammates. CSV is best for
+spreadsheets and lightweight benchmark history.
 
 ## CLI Usage
 

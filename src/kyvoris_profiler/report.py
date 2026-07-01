@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+from csv import writer
 from html import escape
+from io import StringIO
 
 from kyvoris_profiler.compare import ProfileComparison
 from kyvoris_profiler.metrics import ProfileSummary
@@ -70,6 +72,20 @@ def format_json_report(
         "metrics": summary.as_dict(),
     }
     return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def format_csv_report(
+    summary: ProfileSummary,
+    title: str = "Benchmark Results",
+) -> str:
+    """Format a latency summary as CSV."""
+    output = StringIO()
+    csv_writer = writer(output, lineterminator="\n")
+    csv_writer.writerow(["title", title])
+    csv_writer.writerow(["metric", "value"])
+    for metric, value in _metric_rows(summary):
+        csv_writer.writerow([metric, value])
+    return output.getvalue().rstrip("\n")
 
 
 def format_html_report(
@@ -190,6 +206,41 @@ def format_comparison_json_report(
         "comparison": comparison.as_dict(),
     }
     return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def format_comparison_csv_report(
+    comparison: ProfileComparison,
+    title: str = "Benchmark Comparison",
+) -> str:
+    """Format a profile comparison as CSV."""
+    output = StringIO()
+    csv_writer = writer(output, lineterminator="\n")
+    csv_writer.writerow(["title", title])
+    csv_writer.writerow(["baseline_label", comparison.baseline_label])
+    csv_writer.writerow(["candidate_label", comparison.candidate_label])
+    csv_writer.writerow([])
+    csv_writer.writerow(
+        [
+            "metric",
+            "baseline",
+            "candidate",
+            "delta",
+            "percent_change",
+            "result",
+        ]
+    )
+    for metric in comparison.metrics:
+        csv_writer.writerow(
+            [
+                metric.metric,
+                f"{metric.baseline:.3f}",
+                f"{metric.candidate:.3f}",
+                f"{metric.delta:+.3f}",
+                _format_percent_change(metric.percent_change),
+                metric.result,
+            ]
+        )
+    return output.getvalue().rstrip("\n")
 
 
 def format_comparison_html_report(

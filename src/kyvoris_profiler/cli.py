@@ -23,10 +23,12 @@ from kyvoris_profiler import (
 )
 from kyvoris_profiler.metrics import ProfileSummary
 from kyvoris_profiler.report import (
+    format_comparison_csv_report,
     format_comparison_html_report,
     format_comparison_json_report,
     format_comparison_markdown_report,
     format_comparison_text_report,
+    format_csv_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -38,6 +40,7 @@ REPORT_FORMATTERS = {
     "markdown": format_markdown_report,
     "json": format_json_report,
     "html": format_html_report,
+    "csv": format_csv_report,
 }
 
 COMPARISON_FORMATTERS = {
@@ -45,6 +48,7 @@ COMPARISON_FORMATTERS = {
     "markdown": format_comparison_markdown_report,
     "json": format_comparison_json_report,
     "html": format_comparison_html_report,
+    "csv": format_comparison_csv_report,
 }
 
 

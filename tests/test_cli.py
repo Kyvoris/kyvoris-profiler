@@ -86,6 +86,28 @@ def test_cli_writes_json_report_to_file(tmp_path: Path) -> None:
     assert payload["metrics"]["peak_memory_kb"] is not None
 
 
+def test_cli_writes_csv_report_to_file(tmp_path: Path) -> None:
+    output_path = tmp_path / "report.csv"
+
+    exit_code = run(
+        [
+            "tests.fixtures.cli_targets:target",
+            "--iterations",
+            "2",
+            "--format",
+            "csv",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "metric,value" in output
+    assert "Iterations,2" in output
+
+
 def test_cli_compare_reads_json_reports(tmp_path: Path) -> None:
     baseline_path = tmp_path / "baseline.json"
     candidate_path = tmp_path / "candidate.json"
@@ -136,6 +158,49 @@ def test_cli_compare_reads_json_reports(tmp_path: Path) -> None:
     assert "Benchmark Comparison" in output
     assert "Baseline: `before`" in output
     assert "| average_ms |" in output
+
+
+def test_cli_compare_writes_csv_report(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    output_path = tmp_path / "comparison.csv"
+    payload = {
+        "schema_version": "1.0",
+        "metrics": {
+            "average_ms": 100.0,
+            "min_ms": 100.0,
+            "max_ms": 100.0,
+            "p50_ms": 100.0,
+            "p95_ms": 100.0,
+            "iterations": 1,
+            "warmup_iterations": 0,
+            "failed_iterations": 0,
+            "average_cpu_ms": None,
+            "min_cpu_ms": None,
+            "max_cpu_ms": None,
+            "peak_memory_kb": None,
+        },
+    }
+    baseline_path.write_text(json.dumps(payload), encoding="utf-8")
+    candidate_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    exit_code = run(
+        [
+            "compare",
+            str(baseline_path),
+            str(candidate_path),
+            "--format",
+            "csv",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "metric,baseline,candidate,delta,percent_change,result" in output
+    assert "average_ms" in output
 
 
 def test_cli_compare_threshold_failure_returns_nonzero(tmp_path: Path) -> None:

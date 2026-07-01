@@ -38,6 +38,7 @@ python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 5
 | `--format markdown` | Markdown report |
 | `--format json` | JSON report |
 | `--format html` | HTML report |
+| `--format csv` | CSV report |
 | `--output PATH` | Write the report to a file |
 | `--title TEXT` | Set the report title |
 | `--collect-cpu` | Collect process CPU time |
@@ -108,6 +109,7 @@ kyvoris-profiler compare <baseline.json> <candidate.json> [options]
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |
 | `--format html` | HTML comparison |
+| `--format csv` | CSV comparison |
 | `--output PATH` | Write the comparison to a file |
 | `--title TEXT` | Set the comparison title |
 | `--max-regression-percent N` | Allowed regression percentage |

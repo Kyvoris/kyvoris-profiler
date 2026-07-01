@@ -14,10 +14,12 @@ from kyvoris_profiler import (
     benchmark_callable,
     compare_profiles,
     evaluate_thresholds,
+    format_comparison_csv_report,
     format_comparison_html_report,
     format_comparison_json_report,
     format_comparison_markdown_report,
     format_comparison_text_report,
+    format_csv_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -191,6 +193,7 @@ def test_report_formatters_include_key_metrics() -> None:
     markdown_report = format_markdown_report(stats)
     json_report = format_json_report(stats)
     html_report = format_html_report(stats)
+    csv_report = format_csv_report(stats)
 
     assert "Benchmark Results" in text_report
     assert "Iterations: 3" in text_report
@@ -203,6 +206,8 @@ def test_report_formatters_include_key_metrics() -> None:
     assert metrics["peak_memory_kb"] == 42.5
     assert "<!doctype html>" in html_report
     assert "<th>Warmup</th><td>1</td>" in html_report
+    assert "metric,value" in csv_report
+    assert "Average,2.000 ms" in csv_report
 
 
 def test_profile_http_endpoint_against_local_server() -> None:
@@ -286,6 +291,7 @@ def test_comparison_report_formatters_include_key_metrics() -> None:
     markdown_report = format_comparison_markdown_report(comparison)
     json_report = format_comparison_json_report(comparison)
     html_report = format_comparison_html_report(comparison)
+    csv_report = format_comparison_csv_report(comparison)
 
     assert "Benchmark Comparison" in text_report
     assert "average_ms" in text_report
@@ -293,6 +299,8 @@ def test_comparison_report_formatters_include_key_metrics() -> None:
     assert json.loads(json_report)["comparison"]["baseline_label"] == "before"
     assert "<!doctype html>" in html_report
     assert "<th>average_ms</th>" in html_report
+    assert "metric,baseline,candidate,delta,percent_change,result" in csv_report
+    assert "average_ms" in csv_report
 
 
 def test_evaluate_thresholds_reports_regression_violations() -> None:

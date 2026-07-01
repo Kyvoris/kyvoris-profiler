@@ -8,6 +8,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Callable latency benchmarking.
 - Latency summaries with average, minimum, maximum, p50, and p95 values.
 - Plain-text, Markdown, JSON, and HTML report formatting.
+- CSV report formatting.
 - Warmup iterations before measurement.
 - Optional process CPU time metrics.
 - Optional peak Python-traced memory metrics.
@@ -21,6 +22,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
+- Report schema documentation.
 - Minimal dependency footprint.
 - Pytest and unittest coverage for the public benchmark behavior.
 

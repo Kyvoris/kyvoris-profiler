@@ -23,10 +23,12 @@ from kyvoris_profiler.metrics import (
     summarize_profile,
 )
 from kyvoris_profiler.report import (
+    format_comparison_csv_report,
     format_comparison_html_report,
     format_comparison_json_report,
     format_comparison_markdown_report,
     format_comparison_text_report,
+    format_csv_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -48,6 +50,8 @@ __all__ = [
     "format_comparison_json_report",
     "format_comparison_markdown_report",
     "format_comparison_text_report",
+    "format_comparison_csv_report",
+    "format_csv_report",
     "format_html_report",
     "format_json_report",
     "format_markdown_report",
@@ -60,4 +64,4 @@ __all__ = [
     "summarize_profile",
 ]
 
-__version__ = "0.7.1"
+__version__ = "0.8.0"

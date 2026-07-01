@@ -242,3 +242,32 @@ Closes #17
 
 Closes #18
 ```
+
+## Example for 0.8.0
+
+```markdown
+## Summary
+
+- Added CSV output for benchmark and comparison reports.
+- Added `docs/report-schema.md` for JSON and CSV schemas.
+- Updated CLI, tests, docs, release notes, and test runner for `0.8.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added CSV reporting and report schema documentation.
+
+## Risk
+
+- Low. CSV output is additive and uses standard-library formatting.
+
+## Linked Issues
+
+Closes #19
+Closes #20
+```

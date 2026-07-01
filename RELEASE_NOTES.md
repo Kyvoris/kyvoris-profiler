@@ -1,5 +1,28 @@
 # Release Notes
 
+## 0.8.0
+
+`0.8.0` adds CSV reports and schema documentation for report consumers.
+
+### Added
+
+- CSV report formatter for benchmark summaries.
+- CSV report formatter for benchmark comparisons.
+- CLI `--format csv` support for benchmark and comparison reports.
+- CSV smoke checks in `scripts/test-all.ps1`.
+- Report schema documentation in `docs/report-schema.md`.
+- Tests for CSV formatter and CLI output behavior.
+
+### Changed
+
+- Project metadata version is now `0.8.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.7.1
 
 `0.7.1` adds repeatable TOML configuration for comparison and threshold
