@@ -31,6 +31,13 @@ process CPU time from the Python standard library. Memory collection uses
 `tracemalloc`, which captures Python-traced allocations and intentionally avoids
 claiming full process, native framework, or GPU memory coverage.
 
+## 0.4.0 Design Decision
+
+The CLI accepts targets in `module:function` format and limits execution to
+no-argument callables. This keeps the first command-line release predictable and
+aligned with the current Python API. Output formatting reuses the existing
+report module, so CLI behavior stays consistent with library behavior.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
@@ -43,7 +50,7 @@ claiming full process, native framework, or GPU memory coverage.
 
 Create separate design documents for:
 
-- CLI command architecture.
+- CLI callable argument passing and richer target configuration.
 - Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.

@@ -22,8 +22,8 @@ release note draft.
 ## Week 3: 0.4.0 CLI
 
 - Add `kyvoris-profiler` command.
-- Support iterations, warmup, report format, and output path flags.
-- Add CLI smoke tests.
+- Support iterations, warmup, report format, output path, CPU, and memory flags.
+- Add CLI tests for stdout, file output, loading, and validation.
 - Document local and CI usage.
 
 ## Week 4: 0.5.0 Async and Endpoint Benchmarks

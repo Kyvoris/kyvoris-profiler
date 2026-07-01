@@ -15,6 +15,42 @@ implementation starts.
 - `area:metrics`
 - `release:0.2.0`
 - `release:0.3.0`
+- `release:0.4.0`
+
+## 0.4.0 Issues
+
+### Add CLI Entry Point
+
+**Problem:** Users should be able to run a benchmark without writing a custom
+Python driver script.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler` console script exists.
+- `python -m kyvoris_profiler` works.
+- CLI accepts targets in `module:function` format.
+- Tests cover target loading and command execution.
+
+### Add CLI Report Output Options
+
+**Problem:** CLI users need reports in the same formats available from the
+Python API.
+
+**Acceptance criteria:**
+
+- CLI supports text, Markdown, JSON, and HTML output.
+- CLI can write reports to a file path.
+- Tests cover JSON output files.
+
+### Add CLI Metric Flags
+
+**Problem:** Resource profiling should be available from the command line.
+
+**Acceptance criteria:**
+
+- CLI supports `--collect-cpu`.
+- CLI supports `--collect-memory`.
+- CLI reports include resource rows only when collected.
 
 ## 0.3.0 Issues
 

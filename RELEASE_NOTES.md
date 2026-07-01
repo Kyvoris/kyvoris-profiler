@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.4.0
+
+`0.4.0` adds a command-line interface for running Kyvoris Profiler without
+writing a custom benchmark script.
+
+### Added
+
+- `kyvoris-profiler` console script.
+- `python -m kyvoris_profiler` module entry point.
+- CLI support for `module:function` targets.
+- CLI flags for iterations, warmup, report format, output path, title, CPU
+  metrics, and memory metrics.
+- CLI tests for loading targets, stdout reports, JSON file output, and error
+  handling.
+- CLI usage documentation in `docs/cli.md`.
+
+### Changed
+
+- Project metadata version is now `0.4.0`.
+- README and planning docs now include CLI workflows.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+
 ## 0.3.0
 
 `0.3.0` expands Kyvoris Profiler from latency-only benchmarking into opt-in

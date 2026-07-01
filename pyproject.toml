@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kyvoris-profiler"
-version = "0.3.0"
+version = "0.4.0"
 description = "Lightweight profiling utilities for AI inference workloads."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,6 +26,9 @@ classifiers = [
     "Topic :: System :: Benchmark",
 ]
 dependencies = []
+
+[project.scripts]
+kyvoris-profiler = "kyvoris_profiler.cli:main"
 
 [project.optional-dependencies]
 dev = [

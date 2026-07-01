@@ -91,3 +91,33 @@ Closes #4
 Closes #5
 Closes #6
 ```
+
+## Example for 0.4.0
+
+```markdown
+## Summary
+
+- Added `kyvoris-profiler` console script and `python -m kyvoris_profiler`.
+- Added CLI options for iterations, warmup, output format, output path, CPU,
+  memory, and title.
+- Updated README, CLI docs, release notes, issue guidance, and tests.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+
+## Release Notes
+
+- Added command-line benchmarking for no-argument `module:function` targets.
+
+## Risk
+
+- Low. CLI is additive and reuses the existing profiling and reporting APIs.
+
+## Linked Issues
+
+Closes #7
+Closes #8
+Closes #9
+```

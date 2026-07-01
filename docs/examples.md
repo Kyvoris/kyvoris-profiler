@@ -87,6 +87,22 @@ html_report = format_html_report(result, title="Real Model Inference Benchmark")
 JSON is best for automation, storage, and later comparisons. HTML is best for
 sharing a standalone benchmark artifact with teammates.
 
+## CLI Usage
+
+Version `0.4.0` adds a command-line interface for no-argument callables:
+
+```powershell
+kyvoris-profiler examples.run_demo:simulated_inference --iterations 5 --warmup 1 --collect-cpu --collect-memory
+```
+
+To create a JSON artifact:
+
+```powershell
+kyvoris-profiler examples.run_demo:simulated_inference --format json --output reports/demo.json
+```
+
+See [cli.md](cli.md) for the full command reference.
+
 ## Reading the Output
 
 Example output:

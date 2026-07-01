@@ -7,8 +7,9 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.3.0` focuses on latency measurement,
-> warmup-aware benchmarks, optional CPU and memory metrics, and structured reports. See
+> Project status: early alpha. Version `0.4.0` focuses on latency measurement,
+> warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
+> and a command-line interface. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -23,6 +24,7 @@ measuring that repeated behavior.
 - Optionally collect process CPU time and peak Python memory allocations.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, or HTML reports.
+- Run benchmarks from the command line with `kyvoris-profiler`.
 - Keep the core package free of runtime dependencies.
 - Use the same API for simulated workloads, local models, remote endpoints, and
   custom inference wrappers.
@@ -143,6 +145,30 @@ represent repeated inference latency rather than setup time.
 
 More details are available in [docs/examples.md](docs/examples.md).
 
+## CLI Example
+
+After installing locally with `python -m pip install -e ".[dev]"`, benchmark a
+no-argument callable by passing `module:function`:
+
+```powershell
+kyvoris-profiler examples.run_demo:simulated_inference --iterations 5 --warmup 1 --collect-cpu --collect-memory
+```
+
+Write JSON or HTML artifacts with `--format` and `--output`:
+
+```powershell
+kyvoris-profiler examples.run_demo:simulated_inference --iterations 5 --format json --output reports/demo.json
+```
+
+Without installation, run the same CLI through Python:
+
+```powershell
+$env:PYTHONPATH="src"
+python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 5
+```
+
+More CLI details are available in [docs/cli.md](docs/cli.md).
+
 ## API Overview
 
 ### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
@@ -230,6 +256,7 @@ kyvoris-profiler/
 |-- docs/
 |   |-- design/
 |   |   `-- technical-design.md
+|   |-- cli.md
 |   |-- examples.md
 |   |-- github-issues.md
 |   |-- pull-request-descriptions.md
@@ -241,12 +268,15 @@ kyvoris-profiler/
 |-- src/
 |   `-- kyvoris_profiler/
 |       |-- benchmark.py
+|       |-- cli.py
 |       |-- metrics.py
 |       |-- report.py
 |       `-- __init__.py
 |-- tests/
+|   |-- fixtures/
 |   |-- test_benchmark.py
-|   `-- test_benchmark_pytest.py
+|   |-- test_benchmark_pytest.py
+|   `-- test_cli.py
 |-- pyproject.toml
 `-- README.md
 ```
