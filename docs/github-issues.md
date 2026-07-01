@@ -17,6 +17,40 @@ implementation starts.
 - `release:0.3.0`
 - `release:0.4.0`
 - `release:0.5.0`
+- `release:0.6.0`
+
+## 0.6.0 Issues
+
+### Add Profile Comparison API
+
+**Problem:** Users need to compare benchmark results across branches, models, or
+optimization attempts.
+
+**Acceptance criteria:**
+
+- Public `compare_profiles()` API exists.
+- Comparison includes baseline, candidate, delta, percent change, and result.
+- Tests cover improved and regressed metrics.
+
+### Add Comparison Reports
+
+**Problem:** Comparison results should be shareable in CI comments and release
+artifacts.
+
+**Acceptance criteria:**
+
+- Text, Markdown, JSON, and HTML comparison formatters exist.
+- Tests cover key formatter output.
+
+### Add CLI Compare Command
+
+**Problem:** Users need to compare saved JSON reports without writing Python.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler compare baseline.json candidate.json` works.
+- CLI supports output format and output path.
+- Test runner includes a CLI comparison smoke check.
 
 ## 0.5.0 Issues
 

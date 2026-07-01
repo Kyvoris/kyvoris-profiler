@@ -6,14 +6,25 @@ import argparse
 import asyncio
 import inspect
 import importlib
+import json
 import os
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
-from kyvoris_profiler import __version__, profile_async_callable, profile_callable
+from kyvoris_profiler import (
+    __version__,
+    compare_profiles,
+    profile_async_callable,
+    profile_callable,
+)
+from kyvoris_profiler.metrics import ProfileSummary
 from kyvoris_profiler.report import (
+    format_comparison_html_report,
+    format_comparison_json_report,
+    format_comparison_markdown_report,
+    format_comparison_text_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -25,6 +36,13 @@ REPORT_FORMATTERS = {
     "markdown": format_markdown_report,
     "json": format_json_report,
     "html": format_html_report,
+}
+
+COMPARISON_FORMATTERS = {
+    "text": format_comparison_text_report,
+    "markdown": format_comparison_markdown_report,
+    "json": format_comparison_json_report,
+    "html": format_comparison_html_report,
 }
 
 
@@ -51,6 +69,46 @@ def build_parser() -> argparse.ArgumentParser:
         prog="kyvoris-profiler",
         description="Benchmark a no-argument Python callable.",
     )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
+    add_run_arguments(parser)
+    return parser
+
+
+def build_compare_parser() -> argparse.ArgumentParser:
+    """Build the comparison CLI argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="kyvoris-profiler compare",
+        description="Compare two JSON benchmark reports.",
+    )
+    parser.add_argument("baseline", type=Path, help="Baseline JSON report.")
+    parser.add_argument("candidate", type=Path, help="Candidate JSON report.")
+    parser.add_argument("--baseline-label", default="Baseline")
+    parser.add_argument("--candidate-label", default="Candidate")
+    parser.add_argument(
+        "--format",
+        choices=sorted(COMPARISON_FORMATTERS),
+        default="text",
+        help="Comparison report format. Default: text.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="Write comparison report to this path instead of stdout.",
+    )
+    parser.add_argument(
+        "--title",
+        default="Benchmark Comparison",
+        help="Comparison report title. Default: Benchmark Comparison.",
+    )
+    return parser
+
+
+def add_run_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add benchmark execution arguments to a parser."""
     parser.add_argument(
         "target",
         help="Callable target in module:function format.",
@@ -93,19 +151,22 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Collect peak Python-traced memory metrics.",
     )
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"%(prog)s {__version__}",
-    )
-    return parser
 
 
 def run(argv: Sequence[str] | None = None) -> int:
     """Run the CLI and return a process exit code."""
+    if argv and argv[0] == "compare":
+        parser = build_compare_parser()
+        args = parser.parse_args(argv[1:])
+        return run_compare(args, parser)
+
     parser = build_parser()
     args = parser.parse_args(argv)
+    return run_benchmark(args, parser)
 
+
+def run_benchmark(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    """Run a benchmark command."""
     try:
         callable_obj = load_callable(args.target)
         profile_kwargs = {
@@ -123,6 +184,41 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     formatter = REPORT_FORMATTERS[args.format]
     report = formatter(summary, title=args.title)
+
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(report + "\n", encoding="utf-8")
+    else:
+        print(report)
+
+    return 0
+
+
+def read_profile_summary(path: Path) -> ProfileSummary:
+    """Read a profile summary from a JSON report."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metrics = payload.get("metrics")
+    if not isinstance(metrics, dict):
+        raise ValueError(f"{path} does not contain a metrics object")
+    return ProfileSummary(**metrics)
+
+
+def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    """Run a comparison command."""
+    try:
+        baseline = read_profile_summary(args.baseline)
+        candidate = read_profile_summary(args.candidate)
+        comparison = compare_profiles(
+            baseline,
+            candidate,
+            baseline_label=args.baseline_label,
+            candidate_label=args.candidate_label,
+        )
+    except Exception as exc:
+        parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
+
+    formatter = COMPARISON_FORMATTERS[args.format]
+    report = formatter(comparison, title=args.title)
 
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

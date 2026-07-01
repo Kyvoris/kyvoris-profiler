@@ -153,3 +153,34 @@ Closes #10
 Closes #11
 Closes #12
 ```
+
+## Example for 0.6.0
+
+```markdown
+## Summary
+
+- Added `compare_profiles()` and comparison dataclasses.
+- Added text, Markdown, JSON, and HTML comparison reports.
+- Added `kyvoris-profiler compare` for saved JSON benchmark reports.
+- Updated examples, tests, test runner, release notes, and docs for `0.6.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added benchmark comparison support.
+
+## Risk
+
+- Low. The comparison API is additive and preserves existing profiling behavior.
+
+## Linked Issues
+
+Closes #13
+Closes #14
+Closes #15
+```

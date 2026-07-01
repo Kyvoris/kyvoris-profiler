@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from html import escape
 
+from kyvoris_profiler.compare import ProfileComparison
 from kyvoris_profiler.metrics import ProfileSummary
 
 
@@ -103,6 +104,137 @@ def format_html_report(
             "  <table>",
             "    <tbody>",
             table_rows,
+            "    </tbody>",
+            "  </table>",
+            "</body>",
+            "</html>",
+        ]
+    )
+
+
+def _format_percent_change(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value:+.2f}%"
+
+
+def format_comparison_text_report(
+    comparison: ProfileComparison,
+    title: str = "Benchmark Comparison",
+) -> str:
+    """Format a profile comparison as a readable plain-text report."""
+    lines = [
+        title,
+        "-" * len(title),
+        f"Baseline:  {comparison.baseline_label}",
+        f"Candidate: {comparison.candidate_label}",
+        "",
+        "Metric | Baseline | Candidate | Delta | Change | Result",
+    ]
+    for metric in comparison.metrics:
+        lines.append(
+            " | ".join(
+                [
+                    metric.metric,
+                    f"{metric.baseline:.3f}",
+                    f"{metric.candidate:.3f}",
+                    f"{metric.delta:+.3f}",
+                    _format_percent_change(metric.percent_change),
+                    metric.result,
+                ]
+            )
+        )
+    return "\n".join(lines)
+
+
+def format_comparison_markdown_report(
+    comparison: ProfileComparison,
+    title: str = "Benchmark Comparison",
+) -> str:
+    """Format a profile comparison as a Markdown table."""
+    lines = [
+        f"## {title}",
+        "",
+        f"Baseline: `{comparison.baseline_label}`",
+        f"Candidate: `{comparison.candidate_label}`",
+        "",
+        "| Metric | Baseline | Candidate | Delta | Change | Result |",
+        "| --- | ---: | ---: | ---: | ---: | --- |",
+    ]
+    for metric in comparison.metrics:
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    metric.metric,
+                    f"{metric.baseline:.3f}",
+                    f"{metric.candidate:.3f}",
+                    f"{metric.delta:+.3f}",
+                    _format_percent_change(metric.percent_change),
+                    metric.result,
+                ]
+            )
+            + " |"
+        )
+    return "\n".join(lines)
+
+
+def format_comparison_json_report(
+    comparison: ProfileComparison,
+    title: str = "Benchmark Comparison",
+) -> str:
+    """Format a profile comparison as a stable JSON document."""
+    payload = {
+        "title": title,
+        "schema_version": "1.0",
+        "comparison": comparison.as_dict(),
+    }
+    return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def format_comparison_html_report(
+    comparison: ProfileComparison,
+    title: str = "Benchmark Comparison",
+) -> str:
+    """Format a profile comparison as a standalone HTML report."""
+    safe_title = escape(title)
+    rows = "\n".join(
+        "        <tr>"
+        f"<th>{escape(metric.metric)}</th>"
+        f"<td>{metric.baseline:.3f}</td>"
+        f"<td>{metric.candidate:.3f}</td>"
+        f"<td>{metric.delta:+.3f}</td>"
+        f"<td>{escape(_format_percent_change(metric.percent_change))}</td>"
+        f"<td>{escape(metric.result)}</td>"
+        "</tr>"
+        for metric in comparison.metrics
+    )
+    return "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '  <meta charset="utf-8">',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+            f"  <title>{safe_title}</title>",
+            "  <style>",
+            "    body { font-family: Arial, sans-serif; margin: 2rem; color: #1f2933; }",
+            "    table { border-collapse: collapse; min-width: 32rem; }",
+            "    th, td { border-bottom: 1px solid #d9e2ec; padding: 0.6rem 0.8rem; }",
+            "    th { text-align: left; }",
+            "    td { text-align: right; font-variant-numeric: tabular-nums; }",
+            "  </style>",
+            "</head>",
+            "<body>",
+            f"  <h1>{safe_title}</h1>",
+            f"  <p>Baseline: {escape(comparison.baseline_label)}</p>",
+            f"  <p>Candidate: {escape(comparison.candidate_label)}</p>",
+            "  <table>",
+            "    <thead>",
+            "      <tr><th>Metric</th><th>Baseline</th><th>Candidate</th><th>Delta</th><th>Change</th><th>Result</th></tr>",
+            "    </thead>",
+            "    <tbody>",
+            rows,
             "    </tbody>",
             "  </table>",
             "</body>",

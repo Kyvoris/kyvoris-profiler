@@ -86,6 +86,58 @@ def test_cli_writes_json_report_to_file(tmp_path: Path) -> None:
     assert payload["metrics"]["peak_memory_kb"] is not None
 
 
+def test_cli_compare_reads_json_reports(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    output_path = tmp_path / "comparison.md"
+
+    assert run(
+        [
+            "tests.fixtures.cli_targets:target",
+            "--iterations",
+            "2",
+            "--format",
+            "json",
+            "--output",
+            str(baseline_path),
+        ]
+    ) == 0
+    assert run(
+        [
+            "tests.fixtures.cli_targets:target",
+            "--iterations",
+            "2",
+            "--format",
+            "json",
+            "--output",
+            str(candidate_path),
+        ]
+    ) == 0
+
+    exit_code = run(
+        [
+            "compare",
+            str(baseline_path),
+            str(candidate_path),
+            "--baseline-label",
+            "before",
+            "--candidate-label",
+            "after",
+            "--format",
+            "markdown",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "Benchmark Comparison" in output
+    assert "Baseline: `before`" in output
+    assert "| average_ms |" in output
+
+
 def test_cli_runs_async_target(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = run(
         [

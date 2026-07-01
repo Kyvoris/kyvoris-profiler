@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.4.0` adds a standard command-line entry point:
+Version `0.6.0` includes benchmark and comparison command-line workflows:
 
 ```powershell
 kyvoris-profiler <module:function> [options]
@@ -67,6 +67,29 @@ Async callable target:
 ```powershell
 kyvoris-profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 ```
+
+Compare two JSON reports:
+
+```powershell
+kyvoris-profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
+```
+
+## Compare Command
+
+```powershell
+kyvoris-profiler compare <baseline.json> <candidate.json> [options]
+```
+
+| Option | Meaning |
+| --- | --- |
+| `--baseline-label TEXT` | Label for the baseline report |
+| `--candidate-label TEXT` | Label for the candidate report |
+| `--format text` | Plain text comparison |
+| `--format markdown` | Markdown comparison |
+| `--format json` | JSON comparison |
+| `--format html` | HTML comparison |
+| `--output PATH` | Write the comparison to a file |
+| `--title TEXT` | Set the comparison title |
 
 ## Current Limits
 

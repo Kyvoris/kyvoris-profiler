@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.6.0
+
+`0.6.0` adds benchmark comparison utilities for branch-to-branch,
+model-to-model, and before/after performance checks.
+
+### Added
+
+- `compare_profiles()` for comparing two `ProfileSummary` objects.
+- `MetricComparison` and `ProfileComparison` dataclasses.
+- Text, Markdown, JSON, and HTML comparison report formatters.
+- `kyvoris-profiler compare` for comparing two JSON reports from the CLI.
+- Comparison demo script.
+- Detailed metrics explanation guide in `docs/metrics.md`.
+- Test runner coverage for comparison demo and CLI comparison output.
+- Tests for comparison metrics and report formatting.
+
+### Changed
+
+- Project metadata version is now `0.6.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.5.0
 
 `0.5.0` adds async and endpoint profiling for modern inference workflows.

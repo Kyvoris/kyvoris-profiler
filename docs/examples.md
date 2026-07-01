@@ -6,6 +6,8 @@ Kyvoris Profiler includes two runnable examples:
 - `examples/run_model_demo.py` benchmarks a real Hugging Face model inference
   call.
 
+For detailed field definitions, see [metrics.md](metrics.md).
+
 ## Simulated Inference Demo
 
 Run from the project root:
@@ -131,6 +133,21 @@ result = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
 The endpoint helper is intentionally lightweight. For authenticated, streaming,
 or framework-specific clients, wrap your own no-argument callable and pass it to
 `profile_callable()` or `profile_async_callable()`.
+
+## Comparison Demo
+
+Version `0.6.0` adds comparison reports:
+
+```powershell
+$env:PYTHONPATH="src"
+python examples\run_comparison_demo.py
+```
+
+The CLI can compare JSON reports:
+
+```powershell
+python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
+```
 
 ## Reading the Output
 

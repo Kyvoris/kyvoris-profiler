@@ -7,9 +7,10 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.5.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.6.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
-> async workloads, HTTP endpoints, and a command-line interface. See
+> async workloads, HTTP endpoints, comparison reports, and a command-line
+> interface. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -24,6 +25,7 @@ measuring that repeated behavior.
 - Optionally collect process CPU time and peak Python memory allocations.
 - Profile async callables and simple HTTP endpoints.
 - Count failed measured iterations when exception capture is enabled.
+- Compare benchmark summaries across versions, branches, or implementations.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, or HTML reports.
 - Run benchmarks from the command line with `kyvoris-profiler`.
@@ -201,6 +203,29 @@ summary = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
 print(format_text_report(summary, title="Endpoint Benchmark"))
 ```
 
+## Comparison Example
+
+Compare two benchmark summaries:
+
+```python
+from kyvoris_profiler import (
+    compare_profiles,
+    format_comparison_text_report,
+    profile_callable,
+)
+
+baseline = profile_callable(run_inference_before, iterations=10, warmup=1)
+candidate = profile_callable(run_inference_after, iterations=10, warmup=1)
+comparison = compare_profiles(baseline, candidate, "before", "after")
+print(format_comparison_text_report(comparison))
+```
+
+Compare two JSON reports from the CLI:
+
+```powershell
+python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
+```
+
 ## API Overview
 
 ### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
@@ -249,6 +274,14 @@ Profiles a simple HTTP endpoint using Python's standard library:
 summary = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
 ```
 
+### `compare_profiles(baseline, candidate, baseline_label="Baseline", candidate_label="Candidate")`
+
+Compares two `ProfileSummary` objects and returns a `ProfileComparison`:
+
+```python
+comparison = compare_profiles(baseline, candidate, "main", "optimized")
+```
+
 The callable can wrap:
 
 - a local model inference call
@@ -278,6 +311,8 @@ Immutable dataclass containing:
 
 Use `summary.as_dict()` when you need a plain dictionary for serialization or
 custom reporting.
+
+For a deeper explanation of every field, see [docs/metrics.md](docs/metrics.md).
 
 ### Reporting
 
@@ -310,11 +345,13 @@ kyvoris-profiler/
 |   |-- cli.md
 |   |-- examples.md
 |   |-- github-issues.md
+|   |-- metrics.md
 |   |-- pull-request-descriptions.md
 |   |-- weekly-milestones.md
 |   `-- roadmap.md
 |-- examples/
 |   |-- run_async_demo.py
+|   |-- run_comparison_demo.py
 |   |-- run_demo.py
 |   |-- run_endpoint_demo.py
 |   `-- run_model_demo.py
@@ -322,6 +359,7 @@ kyvoris-profiler/
 |   `-- kyvoris_profiler/
 |       |-- benchmark.py
 |       |-- cli.py
+|       |-- compare.py
 |       |-- endpoint.py
 |       |-- metrics.py
 |       |-- report.py
@@ -368,7 +406,10 @@ directly:
 $env:PYTHONPATH="src"
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --warmup 1 --collect-cpu --collect-memory
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
+python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format html --output reports\cli-smoke.html
 python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
+python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format markdown --output reports\comparison-smoke.md
+python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format html --output reports\comparison-smoke.html
 ```
 
 After installing the package locally, test the console script:

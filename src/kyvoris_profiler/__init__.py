@@ -6,6 +6,11 @@ from kyvoris_profiler.benchmark import (
     profile_async_callable,
     profile_callable,
 )
+from kyvoris_profiler.compare import (
+    MetricComparison,
+    ProfileComparison,
+    compare_profiles,
+)
 from kyvoris_profiler.endpoint import profile_http_endpoint
 from kyvoris_profiler.metrics import (
     LatencySummary,
@@ -15,6 +20,10 @@ from kyvoris_profiler.metrics import (
     summarize_profile,
 )
 from kyvoris_profiler.report import (
+    format_comparison_html_report,
+    format_comparison_json_report,
+    format_comparison_markdown_report,
+    format_comparison_text_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
@@ -23,9 +32,16 @@ from kyvoris_profiler.report import (
 
 __all__ = [
     "LatencySummary",
+    "MetricComparison",
+    "ProfileComparison",
     "ProfileSummary",
     "benchmark_async_callable",
     "benchmark_callable",
+    "compare_profiles",
+    "format_comparison_html_report",
+    "format_comparison_json_report",
+    "format_comparison_markdown_report",
+    "format_comparison_text_report",
     "format_html_report",
     "format_json_report",
     "format_markdown_report",
@@ -38,4 +54,4 @@ __all__ = [
     "summarize_profile",
 ]
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"

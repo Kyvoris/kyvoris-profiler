@@ -46,6 +46,13 @@ profiling is intentionally implemented as a small standard-library wrapper
 around `profile_callable()`; richer clients should be represented as user-owned
 callables so the core stays provider-neutral.
 
+## 0.6.0 Design Decision
+
+Comparison is modeled as a separate result type instead of overloading
+`ProfileSummary`. This keeps single-run measurements stable while giving CI and
+release workflows a structured representation for deltas, percentage changes,
+and improvement/regression status.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
@@ -61,6 +68,7 @@ Create separate design documents for:
 - CLI callable argument passing and richer target configuration.
 - Async concurrency controls.
 - Richer HTTP endpoint configuration.
+- CI regression threshold policy and failure behavior.
 - Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.

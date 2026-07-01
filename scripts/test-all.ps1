@@ -28,6 +28,33 @@ function Invoke-Step {
     Write-Host "PASS: $Name" -ForegroundColor Green
 }
 
+function Assert-PathExists {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "Expected path was not created: $Path"
+    }
+}
+
+function Assert-FileContains {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Text
+    )
+
+    Assert-PathExists $Path
+    $content = Get-Content -LiteralPath $Path -Raw
+    if (-not $content.Contains($Text)) {
+        throw "Expected '$Path' to contain '$Text'"
+    }
+}
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
@@ -36,6 +63,10 @@ $env:PYTHONPATH = "src"
 Write-Host "Kyvoris Profiler test runner" -ForegroundColor Green
 Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
+
+Invoke-Step "Package version check" {
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.6.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+}
 
 Invoke-Step "Pytest suite" {
     python -m pytest
@@ -65,6 +96,45 @@ Invoke-Step "CLI JSON output smoke test" {
     python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
 }
 
+Invoke-Step "CLI JSON output validation" {
+    Assert-PathExists "reports\cli-smoke.json"
+    python -c "import json; data=json.load(open('reports/cli-smoke.json', encoding='utf-8')); assert data['schema_version'] == '1.0'; assert data['metrics']['iterations'] == 3; assert 'average_ms' in data['metrics']; print('JSON report valid')"
+}
+
+Invoke-Step "CLI HTML output smoke test" {
+    python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format html --output reports\cli-smoke.html
+}
+
+Invoke-Step "CLI HTML output validation" {
+    Assert-FileContains "reports\cli-smoke.html" "<!doctype html>"
+    Assert-FileContains "reports\cli-smoke.html" "Benchmark Results"
+}
+
+Invoke-Step "Comparison demo" {
+    python examples\run_comparison_demo.py
+}
+
+Invoke-Step "CLI comparison smoke test" {
+    python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\baseline-smoke.json
+    python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\candidate-smoke.json
+    python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format markdown --output reports\comparison-smoke.md
+}
+
+Invoke-Step "CLI comparison output validation" {
+    Assert-PathExists "reports\comparison-smoke.md"
+    Assert-FileContains "reports\comparison-smoke.md" "Benchmark Comparison"
+    Assert-FileContains "reports\comparison-smoke.md" "average_ms"
+}
+
+Invoke-Step "CLI comparison HTML output smoke test" {
+    python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format html --output reports\comparison-smoke.html
+}
+
+Invoke-Step "CLI comparison HTML output validation" {
+    Assert-FileContains "reports\comparison-smoke.html" "<!doctype html>"
+    Assert-FileContains "reports\comparison-smoke.html" "Benchmark Comparison"
+}
+
 Invoke-Step "CLI async target smoke test" {
     python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 }
@@ -77,7 +147,12 @@ if ($InstallHuggingFace) {
 
 if ($IncludeHuggingFace) {
     Invoke-Step "Hugging Face model example" {
-        python examples\run_model_demo.py
+        python examples\run_model_demo.py | Tee-Object -FilePath reports\huggingface-smoke.txt
+    }
+
+    Invoke-Step "Hugging Face output validation" {
+        Assert-FileContains "reports\huggingface-smoke.txt" "Model: distilbert-base-uncased-finetuned-sst-2-english"
+        Assert-FileContains "reports\huggingface-smoke.txt" "Sample output:"
     }
 }
 else {

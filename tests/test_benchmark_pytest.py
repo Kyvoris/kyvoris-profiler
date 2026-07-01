@@ -12,14 +12,19 @@ from kyvoris_profiler import (
     LatencySummary,
     ProfileSummary,
     benchmark_callable,
-    profile_async_callable,
-    profile_http_endpoint,
+    compare_profiles,
+    format_comparison_html_report,
+    format_comparison_json_report,
+    format_comparison_markdown_report,
+    format_comparison_text_report,
     format_html_report,
     format_json_report,
     format_markdown_report,
     format_text_report,
     percentile,
+    profile_async_callable,
     profile_callable,
+    profile_http_endpoint,
     summarize_latencies,
     summarize_profile,
 )
@@ -235,3 +240,55 @@ def test_profile_http_endpoint_against_local_server() -> None:
     assert stats.average_ms > 0.0
     assert stats.average_cpu_ms is not None
     assert stats.peak_memory_kb is not None
+
+
+def test_compare_profiles_reports_metric_changes() -> None:
+    baseline = summarize_profile(
+        [10.0, 12.0, 14.0],
+        cpu_times_ms=[5.0, 6.0, 7.0],
+        peak_memory_kb=100.0,
+    )
+    candidate = summarize_profile(
+        [8.0, 9.0, 10.0],
+        cpu_times_ms=[4.0, 5.0, 6.0],
+        peak_memory_kb=80.0,
+    )
+
+    comparison = compare_profiles(
+        baseline,
+        candidate,
+        baseline_label="main",
+        candidate_label="optimized",
+    )
+
+    average = next(metric for metric in comparison.metrics if metric.metric == "average_ms")
+
+    assert comparison.baseline_label == "main"
+    assert comparison.candidate_label == "optimized"
+    assert average.baseline == 12.0
+    assert average.candidate == 9.0
+    assert average.delta == -3.0
+    assert average.percent_change == pytest.approx(-25.0)
+    assert average.improved is True
+    assert average.result == "improved"
+
+
+def test_comparison_report_formatters_include_key_metrics() -> None:
+    comparison = compare_profiles(
+        summarize_profile([10.0, 12.0, 14.0]),
+        summarize_profile([11.0, 13.0, 15.0]),
+        baseline_label="before",
+        candidate_label="after",
+    )
+
+    text_report = format_comparison_text_report(comparison)
+    markdown_report = format_comparison_markdown_report(comparison)
+    json_report = format_comparison_json_report(comparison)
+    html_report = format_comparison_html_report(comparison)
+
+    assert "Benchmark Comparison" in text_report
+    assert "average_ms" in text_report
+    assert "| average_ms |" in markdown_report
+    assert json.loads(json_report)["comparison"]["baseline_label"] == "before"
+    assert "<!doctype html>" in html_report
+    assert "<th>average_ms</th>" in html_report
