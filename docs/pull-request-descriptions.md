@@ -451,3 +451,34 @@ Closes #30
 Closes #31
 Closes #32
 ```
+
+## Example for 1.0.0
+
+```markdown
+## Summary
+
+- Added GitHub Actions CI for supported Python versions.
+- Marked package metadata and README status as stable.
+- Updated release notes and validation docs for `1.0.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1`
+
+## Release Notes
+
+- First stable Kyvoris Profiler release.
+
+## Risk
+
+- Low. This release adds CI and stable metadata without changing core profiler
+  behavior.
+
+## Linked Issues
+
+Closes #33
+Closes #34
+```

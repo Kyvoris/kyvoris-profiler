@@ -25,6 +25,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - History filtering by label, metadata, and latest count.
 - Saved history comparison presets.
 - Release-readiness checks for package artifacts.
+- GitHub Actions CI for supported Python versions.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -34,12 +35,12 @@ currently focused on a small, dependable core before adding heavier integrations
 
 ## Near-Term Milestones
 
-### 1. 1.0.0 Release Operations
+### 1. Post-1.0 Release Operations
 
-- Fresh-environment install verification.
-- GitHub Actions CI.
-- Final README quickstart polish.
 - Tagging and release checklist execution.
+- PyPI publishing workflow.
+- Issue and pull request templates.
+- Changelog automation.
 
 ### 2. Structured Output
 

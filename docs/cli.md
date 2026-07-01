@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.14.0` includes benchmark, comparison, threshold, TOML config, and
+Version `1.0.0` includes benchmark, comparison, threshold, TOML config, and
 history workflows:
 
 ```powershell

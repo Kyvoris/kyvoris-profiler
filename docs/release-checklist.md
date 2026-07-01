@@ -30,3 +30,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1
 ## Tagging
 
 Tag only after the release commit is pushed and the working tree is clean.
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```

@@ -1,5 +1,26 @@
 # Release Notes
 
+## 1.0.0
+
+`1.0.0` is the first stable Kyvoris Profiler release.
+
+### Added
+
+- GitHub Actions CI for Python 3.10, 3.11, 3.12, and 3.13.
+- CI coverage for pytest, unittest, and package release checks.
+
+### Changed
+
+- Project metadata version is now `1.0.0`.
+- Development status classifier is now production/stable.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1`
+
 ## 0.14.0
 
 `0.14.0` adds packaging and release-readiness checks before the 1.0.0 push.

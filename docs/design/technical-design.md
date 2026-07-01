@@ -113,6 +113,13 @@ installs the wheel into a clean virtual environment, and checks the installed
 console script. This keeps 1.0.0 preparation concrete while avoiding premature
 publishing automation.
 
+## 1.0.0 Design Decision
+
+The first stable release adds CI across supported Python versions and marks the
+package as production/stable. Publishing automation remains a post-1.0 concern;
+the release gate is CI plus the local release checklist so tagging stays
+deliberate.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

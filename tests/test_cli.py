@@ -25,8 +25,22 @@ def test_package_metadata_version_matches_public_version() -> None:
     metadata = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
 
     assert metadata["project"]["version"] == kyvoris_profiler.__version__
+    assert (
+        "Development Status :: 5 - Production/Stable"
+        in metadata["project"]["classifiers"]
+    )
     assert metadata["project"]["urls"]["Repository"].endswith("kyvoris-profiler")
     assert "build>=1" in metadata["project"]["optional-dependencies"]["dev"]
+
+
+def test_ci_workflow_exists_for_supported_python_versions() -> None:
+    workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "ci.yml"
+    workflow = workflow_path.read_text(encoding="utf-8")
+
+    assert 'python-version: ["3.10", "3.11", "3.12", "3.13"]' in workflow
+    assert "python -m pytest" in workflow
+    assert "python -m unittest discover -s tests" in workflow
+    assert "scripts\\release-check.ps1" in workflow
 
 
 def test_hugging_face_demo_uses_three_default_models() -> None:

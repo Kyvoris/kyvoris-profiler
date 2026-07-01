@@ -103,6 +103,13 @@ release note draft.
 - Tighten package metadata.
 - Add release checklist documentation.
 
+## Week 15: 1.0.0 Stable Release
+
+- Add GitHub Actions CI across supported Python versions.
+- Mark package metadata as production/stable.
+- Run full local validation and release checks.
+- Prepare the repository for tagging.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

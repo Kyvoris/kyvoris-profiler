@@ -27,6 +27,32 @@ implementation starts.
 - `release:0.12.0`
 - `release:0.13.0`
 - `release:0.14.0`
+- `release:1.0.0`
+
+## 1.0.0 Issues
+
+### Add GitHub Actions CI
+
+**Problem:** The first stable release needs repeatable validation on supported
+Python versions.
+
+**Acceptance criteria:**
+
+- CI runs on pushes and pull requests to `main`.
+- CI tests Python 3.10, 3.11, 3.12, and 3.13.
+- CI runs pytest and unittest.
+- CI runs package release checks.
+
+### Mark First Stable Release
+
+**Problem:** Package metadata and documentation should reflect 1.0.0 stability.
+
+**Acceptance criteria:**
+
+- Project version is `1.0.0`.
+- Package classifier is production/stable.
+- README status says stable.
+- Release notes document 1.0.0 validation.
 
 ## 0.14.0 Issues
 
