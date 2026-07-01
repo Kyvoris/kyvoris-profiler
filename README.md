@@ -7,8 +7,8 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. The current package focuses on latency
-> measurement, metric summaries, and report formatting. See
+> Project status: early alpha. Version `0.2.0` focuses on latency measurement,
+> warmup-aware benchmarks, metric summaries, and structured reports. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -19,8 +19,9 @@ measuring that repeated behavior.
 
 - Measure repeated inference latency in milliseconds.
 - Capture average, minimum, maximum, p50, and p95 latency.
+- Run warmup iterations before measured iterations.
 - Return typed summaries instead of loosely shaped dictionaries.
-- Generate plain-text or Markdown reports.
+- Generate plain-text, Markdown, JSON, or HTML reports.
 - Keep the core package free of runtime dependencies.
 - Use the same API for simulated workloads, local models, remote endpoints, and
   custom inference wrappers.
@@ -62,7 +63,7 @@ def run_inference() -> str:
     return "ok"
 
 
-summary = benchmark_callable(run_inference, iterations=20)
+summary = benchmark_callable(run_inference, iterations=20, warmup=2)
 print(format_text_report(summary, title="Inference Benchmark"))
 ```
 
@@ -72,6 +73,7 @@ Example output:
 Inference Benchmark
 -------------------
 Iterations: 20
+Warmup:     2
 Average:    5.100 ms
 Minimum:    5.000 ms
 Maximum:    5.400 ms
@@ -120,19 +122,20 @@ Sample output: [{'label': 'POSITIVE', 'score': 0.999...}]
 
 The exact latency values depend on hardware, installed backend, Python version,
 power mode, and whether model files are already cached. The example loads the
-model before benchmarking and performs one warmup call, so the measured results
+model before benchmarking and uses one configured warmup iteration, so the measured results
 represent repeated inference latency rather than setup time.
 
 More details are available in [docs/examples.md](docs/examples.md).
 
 ## API Overview
 
-### `benchmark_callable(callable_obj, iterations=10)`
+### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
 
 Runs a no-argument callable multiple times and returns a `LatencySummary`.
+Warmup calls run before timing starts.
 
 ```python
-summary = benchmark_callable(run_inference, iterations=10)
+summary = benchmark_callable(run_inference, iterations=10, warmup=1)
 ```
 
 The callable can wrap:
@@ -155,6 +158,7 @@ Immutable dataclass containing:
 | `p50_ms` | Median latency |
 | `p95_ms` | Slower-end latency often useful for user-facing performance |
 | `iterations` | Number of measured runs |
+| `warmup_iterations` | Number of untimed warmup runs before measurement |
 
 Use `summary.as_dict()` when you need a plain dictionary for serialization or
 custom reporting.
@@ -162,21 +166,35 @@ custom reporting.
 ### Reporting
 
 ```python
-from kyvoris_profiler import format_markdown_report, format_text_report
+from kyvoris_profiler import (
+    format_html_report,
+    format_json_report,
+    format_markdown_report,
+    format_text_report,
+)
 
 print(format_text_report(summary))
 print(format_markdown_report(summary))
+print(format_json_report(summary))
+print(format_html_report(summary))
 ```
 
 `format_text_report()` is useful for terminal output. `format_markdown_report()`
 is useful for README snippets, CI comments, and benchmark artifacts.
+`format_json_report()` is useful for automation and storage. `format_html_report()`
+is useful for standalone benchmark artifacts.
 
 ## Project Layout
 
 ```text
 kyvoris-profiler/
 |-- docs/
+|   |-- design/
+|   |   `-- technical-design.md
 |   |-- examples.md
+|   |-- github-issues.md
+|   |-- pull-request-descriptions.md
+|   |-- weekly-milestones.md
 |   `-- roadmap.md
 |-- examples/
 |   |-- run_demo.py
@@ -220,15 +238,15 @@ python -m unittest discover -s tests
 
 Planned areas include:
 
-- warmup iterations as a first-class benchmark option
-- JSON and CSV exports
+- CSV exports
 - benchmark labels and metadata
 - exception capture for failed iterations
 - support for callables with arguments
 - inference-specific metrics such as tokens per second and time to first token
 - comparison reports for multiple benchmark runs
 
-See [docs/roadmap.md](docs/roadmap.md) for the full roadmap.
+See [docs/roadmap.md](docs/roadmap.md) for the full roadmap, and
+[RELEASE_NOTES.md](RELEASE_NOTES.md) for release history.
 
 ## Contributing
 

@@ -16,8 +16,9 @@ class LatencySummary:
     p50_ms: float
     p95_ms: float
     iterations: int
+    warmup_iterations: int = 0
 
-    def as_dict(self) -> dict[str, float]:
+    def as_dict(self) -> dict[str, float | int]:
         """Return the summary as a plain dictionary."""
         return asdict(self)
 
@@ -43,8 +44,14 @@ def percentile(sorted_values: list[float], percentile_value: float) -> float:
     ) * weight
 
 
-def summarize_latencies(latencies_ms: Iterable[float]) -> LatencySummary:
+def summarize_latencies(
+    latencies_ms: Iterable[float],
+    warmup_iterations: int = 0,
+) -> LatencySummary:
     """Build a latency summary from millisecond measurements."""
+    if warmup_iterations < 0:
+        raise ValueError("warmup_iterations must be greater than or equal to 0")
+
     sorted_latencies = sorted(latencies_ms)
     if not sorted_latencies:
         raise ValueError("latencies_ms cannot be empty")
@@ -56,4 +63,5 @@ def summarize_latencies(latencies_ms: Iterable[float]) -> LatencySummary:
         p50_ms=percentile(sorted_latencies, 50.0),
         p95_ms=percentile(sorted_latencies, 95.0),
         iterations=len(sorted_latencies),
+        warmup_iterations=warmup_iterations,
     )

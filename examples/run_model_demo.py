@@ -28,10 +28,9 @@ def main() -> None:
     def run_inference() -> list[dict[str, float | str]]:
         return classifier(TEXT)
 
-    # Warm up once so one-time model setup does not distort the benchmark.
     sample_output = run_inference()
 
-    result = benchmark_callable(run_inference, iterations=10)
+    result = benchmark_callable(run_inference, iterations=10, warmup=1)
 
     print(format_text_report(result, title="Real Model Inference Benchmark"))
     print()

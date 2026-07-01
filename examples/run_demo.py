@@ -14,5 +14,5 @@ def simulated_inference() -> str:
 
 
 if __name__ == "__main__":
-    result = benchmark_callable(simulated_inference, iterations=5)
+    result = benchmark_callable(simulated_inference, iterations=5, warmup=1)
     print(format_text_report(result, title="Simulated Inference Benchmark"))

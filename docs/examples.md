@@ -61,15 +61,31 @@ The model is loaded before the benchmark starts:
 classifier = pipeline("sentiment-analysis", model=MODEL_NAME)
 ```
 
-The script also performs one warmup call before timing:
+The script performs one sample call for visible output, then the benchmark API
+runs one configured warmup call before timing:
 
 ```python
-sample_output = run_inference()
+result = benchmark_callable(run_inference, iterations=10, warmup=1)
 ```
 
 This matters because model loading, tokenization setup, backend initialization,
 and first-run caches can make the first call much slower than normal inference.
 The benchmark is intended to measure repeated inference latency, not setup time.
+
+## Structured Reports
+
+Version `0.2.0` includes JSON and HTML formatters in addition to text and
+Markdown:
+
+```python
+from kyvoris_profiler import format_html_report, format_json_report
+
+json_report = format_json_report(result, title="Real Model Inference Benchmark")
+html_report = format_html_report(result, title="Real Model Inference Benchmark")
+```
+
+JSON is best for automation, storage, and later comparisons. HTML is best for
+sharing a standalone benchmark artifact with teammates.
 
 ## Reading the Output
 
@@ -79,6 +95,7 @@ Example output:
 Real Model Inference Benchmark
 ------------------------------
 Iterations: 10
+Warmup:     1
 Average:    32.415 ms
 Minimum:    29.880 ms
 Maximum:    41.203 ms

@@ -7,7 +7,8 @@ currently focused on a small, dependable core before adding heavier integrations
 
 - Callable latency benchmarking.
 - Latency summaries with average, minimum, maximum, p50, and p95 values.
-- Plain-text and Markdown report formatting.
+- Plain-text, Markdown, JSON, and HTML report formatting.
+- Warmup iterations before measurement.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Minimal dependency footprint.
@@ -15,27 +16,33 @@ currently focused on a small, dependable core before adding heavier integrations
 
 ## Near-Term Milestones
 
-### 1. Structured Output
+### 1. Release Operations
 
-- JSON export for benchmark summaries.
+- Weekly milestones.
+- GitHub issue templates.
+- Pull request descriptions.
+- Release notes.
+- Technical design documents for major changes.
+
+### 2. Structured Output
+
 - Optional CSV export for repeated benchmark runs.
 - Stable schema documentation for downstream tooling.
 
-### 2. Benchmark Controls
+### 3. Benchmark Controls
 
-- Warmup iterations.
 - Configurable run labels and metadata.
 - Optional exception capture for failed iterations.
 - Support for benchmarking callables with arguments.
 
-### 3. Inference-Oriented Metrics
+### 4. Inference-Oriented Metrics
 
 - Tokens per second.
 - Input and output token counts.
 - Time to first token for streaming workloads.
 - Request success and failure counts.
 
-### 4. Reporting
+### 5. Reporting
 
 - Multi-run comparison reports.
 - Markdown report files for CI artifacts.
