@@ -266,6 +266,142 @@ def test_cli_compare_threshold_pass_returns_zero(tmp_path: Path) -> None:
     assert exit_code == 0
 
 
+def test_cli_compare_reads_toml_config(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    output_path = tmp_path / "comparison.md"
+    config_path = tmp_path / "kyvoris-profiler.toml"
+
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 100.0,
+                    "min_ms": 100.0,
+                    "max_ms": 100.0,
+                    "p50_ms": 100.0,
+                    "p95_ms": 100.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    candidate_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 103.0,
+                    "min_ms": 103.0,
+                    "max_ms": 103.0,
+                    "p50_ms": 103.0,
+                    "p95_ms": 103.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    config_path.write_text(
+        "\n".join(
+            [
+                "[compare]",
+                f'baseline = "{baseline_path.as_posix()}"',
+                f'candidate = "{candidate_path.as_posix()}"',
+                'baseline_label = "before"',
+                'candidate_label = "after"',
+                'format = "markdown"',
+                f'output = "{output_path.as_posix()}"',
+                "",
+                "[thresholds]",
+                "max_regression_percent = 5",
+                'metrics = ["average_ms"]',
+                "fail_on_regression = true",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(["compare", "--config", str(config_path)])
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "Baseline: `before`" in output
+    assert "| average_ms |" in output
+
+
+def test_cli_compare_command_line_overrides_toml_config(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    configured_output_path = tmp_path / "configured.md"
+    override_output_path = tmp_path / "override.json"
+    config_path = tmp_path / "kyvoris-profiler.toml"
+    payload = {
+        "schema_version": "1.0",
+        "metrics": {
+            "average_ms": 100.0,
+            "min_ms": 100.0,
+            "max_ms": 100.0,
+            "p50_ms": 100.0,
+            "p95_ms": 100.0,
+            "iterations": 1,
+            "warmup_iterations": 0,
+            "failed_iterations": 0,
+            "average_cpu_ms": None,
+            "min_cpu_ms": None,
+            "max_cpu_ms": None,
+            "peak_memory_kb": None,
+        },
+    }
+    baseline_path.write_text(json.dumps(payload), encoding="utf-8")
+    candidate_path.write_text(json.dumps(payload), encoding="utf-8")
+    config_path.write_text(
+        "\n".join(
+            [
+                "[compare]",
+                f'baseline = "{baseline_path.as_posix()}"',
+                f'candidate = "{candidate_path.as_posix()}"',
+                'format = "markdown"',
+                f'output = "{configured_output_path.as_posix()}"',
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(
+        [
+            "compare",
+            "--config",
+            str(config_path),
+            "--format",
+            "json",
+            "--output",
+            str(override_output_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert not configured_output_path.exists()
+    assert json.loads(override_output_path.read_text(encoding="utf-8"))[
+        "schema_version"
+    ] == "1.0"
+
+
 def test_cli_runs_async_target(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = run(
         [

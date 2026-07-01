@@ -192,6 +192,7 @@ Closes #15
 
 - Added threshold evaluation for profile comparisons.
 - Added CLI regression gate flags for comparison reports.
+- Added TOML config support for repeatable comparison settings.
 - Updated test runner, docs, release notes, and tests for `0.7.0`.
 
 ## Testing
@@ -212,4 +213,32 @@ Closes #15
 
 Closes #16
 Closes #17
+```
+
+## Example for 0.7.1
+
+```markdown
+## Summary
+
+- Added TOML config support for comparison and threshold settings.
+- Added sample `kyvoris-profiler.toml`.
+- Updated test runner, docs, release notes, and CLI tests for `0.7.1`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added repeatable TOML config for comparison workflows.
+
+## Risk
+
+- Low. Config support is additive and CLI flags still override config values.
+
+## Linked Issues
+
+Closes #18
 ```

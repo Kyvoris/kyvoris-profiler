@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.7.0` includes benchmark, comparison, and threshold command-line
+Version `0.7.1` includes benchmark, comparison, threshold, and TOML config
 workflows:
 
 ```powershell
@@ -81,6 +81,18 @@ Fail when selected metrics regress beyond 5%:
 kyvoris-profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --threshold-metric p95_ms --fail-on-regression
 ```
 
+Version `0.7.1` adds TOML config support:
+
+```powershell
+kyvoris-profiler compare --config kyvoris-profiler.toml
+```
+
+CLI arguments override config values:
+
+```powershell
+kyvoris-profiler compare --config kyvoris-profiler.toml --format html --output reports\comparison.html
+```
+
 ## Compare Command
 
 ```powershell
@@ -91,6 +103,7 @@ kyvoris-profiler compare <baseline.json> <candidate.json> [options]
 | --- | --- |
 | `--baseline-label TEXT` | Label for the baseline report |
 | `--candidate-label TEXT` | Label for the candidate report |
+| `--config PATH` | TOML comparison config file |
 | `--format text` | Plain text comparison |
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |
@@ -100,6 +113,26 @@ kyvoris-profiler compare <baseline.json> <candidate.json> [options]
 | `--max-regression-percent N` | Allowed regression percentage |
 | `--threshold-metric NAME` | Metric to evaluate; can be passed multiple times |
 | `--fail-on-regression` | Exit with code 1 when threshold violations are found |
+
+## TOML Config
+
+Use `kyvoris-profiler.toml` for repeatable comparison settings:
+
+```toml
+[compare]
+baseline = "reports/baseline.json"
+candidate = "reports/candidate.json"
+baseline_label = "baseline"
+candidate_label = "candidate"
+format = "markdown"
+output = "reports/comparison.md"
+title = "Benchmark Comparison"
+
+[thresholds]
+max_regression_percent = 5
+metrics = ["average_ms", "p95_ms", "failed_iterations"]
+fail_on_regression = true
+```
 
 ## Current Limits
 

@@ -155,6 +155,12 @@ Version `0.7.0` adds threshold checks for CI:
 python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --fail-on-regression
 ```
 
+Version `0.7.1` lets comparison settings come from TOML:
+
+```powershell
+python -m kyvoris_profiler compare --config kyvoris-profiler.toml
+```
+
 ## Reading the Output
 
 Example output:

@@ -1,5 +1,28 @@
 # Release Notes
 
+## 0.7.1
+
+`0.7.1` adds repeatable TOML configuration for comparison and threshold
+workflows.
+
+### Added
+
+- `kyvoris-profiler.toml` example config file.
+- `kyvoris-profiler compare --config kyvoris-profiler.toml`.
+- CLI override support when a config file is provided.
+- Test runner coverage for config-based comparison.
+- Documentation for TOML config usage.
+
+### Changed
+
+- Project metadata version is now `0.7.1`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.7.0
 
 `0.7.0` adds threshold evaluation for CI-friendly performance regression gates.
@@ -13,6 +36,8 @@
   - `--max-regression-percent`
   - `--threshold-metric`
   - `--fail-on-regression`
+- TOML comparison config support with `--config`.
+- Example `kyvoris-profiler.toml` config file.
 - Test runner smoke checks for passing and failing threshold behavior.
 - Tests for threshold API validation and CLI exit codes.
 

@@ -1,0 +1,13 @@
+[compare]
+baseline = "reports/baseline.json"
+candidate = "reports/candidate.json"
+baseline_label = "baseline"
+candidate_label = "candidate"
+format = "markdown"
+output = "reports/comparison.md"
+title = "Benchmark Comparison"
+
+[thresholds]
+max_regression_percent = 5
+metrics = ["average_ms", "p95_ms", "failed_iterations"]
+fail_on_regression = true

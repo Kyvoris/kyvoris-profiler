@@ -9,6 +9,7 @@ import importlib
 import json
 import os
 import sys
+import tomllib
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
@@ -85,14 +86,14 @@ def build_compare_parser() -> argparse.ArgumentParser:
         prog="kyvoris-profiler compare",
         description="Compare two JSON benchmark reports.",
     )
-    parser.add_argument("baseline", type=Path, help="Baseline JSON report.")
-    parser.add_argument("candidate", type=Path, help="Candidate JSON report.")
-    parser.add_argument("--baseline-label", default="Baseline")
-    parser.add_argument("--candidate-label", default="Candidate")
+    parser.add_argument("baseline", nargs="?", type=Path, help="Baseline JSON report.")
+    parser.add_argument("candidate", nargs="?", type=Path, help="Candidate JSON report.")
+    parser.add_argument("--config", type=Path, help="TOML comparison config file.")
+    parser.add_argument("--baseline-label")
+    parser.add_argument("--candidate-label")
     parser.add_argument(
         "--format",
         choices=sorted(COMPARISON_FORMATTERS),
-        default="text",
         help="Comparison report format. Default: text.",
     )
     parser.add_argument(
@@ -102,7 +103,6 @@ def build_compare_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--title",
-        default="Benchmark Comparison",
         help="Comparison report title. Default: Benchmark Comparison.",
     )
     parser.add_argument(
@@ -223,30 +223,68 @@ def read_profile_summary(path: Path) -> ProfileSummary:
 def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     """Run a comparison command."""
     try:
-        baseline = read_profile_summary(args.baseline)
-        candidate = read_profile_summary(args.candidate)
+        compare_config = load_compare_config(args.config) if args.config else {}
+        thresholds_config = load_thresholds_config(args.config) if args.config else {}
+
+        baseline_path = args.baseline or _optional_path(compare_config.get("baseline"))
+        candidate_path = args.candidate or _optional_path(compare_config.get("candidate"))
+        if baseline_path is None or candidate_path is None:
+            raise ValueError("baseline and candidate reports are required")
+
+        baseline_label = args.baseline_label or str(
+            compare_config.get("baseline_label", "Baseline")
+        )
+        candidate_label = args.candidate_label or str(
+            compare_config.get("candidate_label", "Candidate")
+        )
+        output_format = args.format or str(compare_config.get("format", "text"))
+        if output_format not in COMPARISON_FORMATTERS:
+            raise ValueError(
+                "format must be one of "
+                + ", ".join(sorted(COMPARISON_FORMATTERS))
+            )
+        output_path = args.output or _optional_path(compare_config.get("output"))
+        title = args.title or str(compare_config.get("title", "Benchmark Comparison"))
+        max_regression_percent = (
+            args.max_regression_percent
+            if args.max_regression_percent is not None
+            else thresholds_config.get("max_regression_percent")
+        )
+        threshold_metrics = (
+            args.threshold_metrics
+            if args.threshold_metrics is not None
+            else thresholds_config.get("metrics")
+        )
+        fail_on_regression = (
+            args.fail_on_regression
+            if args.fail_on_regression
+            else bool(thresholds_config.get("fail_on_regression", False))
+        )
+
+        baseline = read_profile_summary(baseline_path)
+        candidate = read_profile_summary(candidate_path)
         comparison = compare_profiles(
             baseline,
             candidate,
-            baseline_label=args.baseline_label,
-            candidate_label=args.candidate_label,
+            baseline_label=baseline_label,
+            candidate_label=candidate_label,
         )
         threshold_evaluation = None
-        if args.max_regression_percent is not None:
+        if max_regression_percent is not None:
             threshold_evaluation = evaluate_thresholds(
                 comparison,
-                max_regression_percent=args.max_regression_percent,
-                metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
+                max_regression_percent=float(max_regression_percent),
+                metrics=set(threshold_metrics) if threshold_metrics else None,
             )
     except Exception as exc:
         parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
 
-    formatter = COMPARISON_FORMATTERS[args.format]
-    report = formatter(comparison, title=args.title)
+    formatter = COMPARISON_FORMATTERS[output_format]
+    report = formatter(comparison, title=title)
 
-    if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(report + "\n", encoding="utf-8")
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(report + "\n", encoding="utf-8")
     else:
         print(report)
 
@@ -266,10 +304,47 @@ def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
                     f"(allowed {violation.allowed_regression_percent:.2f}%)",
                     file=sys.stderr,
                 )
-            if args.fail_on_regression:
+            if fail_on_regression:
                 return 1
 
     return 0
+
+
+def _optional_path(value: object) -> Path | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError("path values in config must be strings")
+    return Path(value)
+
+
+def load_toml_config(path: Path) -> dict[str, object]:
+    """Load a TOML config file."""
+    return tomllib.loads(path.read_text(encoding="utf-8"))
+
+
+def load_compare_config(path: Path) -> dict[str, object]:
+    """Load compare settings from a TOML config file."""
+    config = load_toml_config(path)
+    compare_config = config.get("compare", {})
+    if not isinstance(compare_config, dict):
+        raise ValueError("[compare] config must be a table")
+    return compare_config
+
+
+def load_thresholds_config(path: Path) -> dict[str, object]:
+    """Load threshold settings from a TOML config file."""
+    config = load_toml_config(path)
+    thresholds_config = config.get("thresholds", {})
+    if not isinstance(thresholds_config, dict):
+        raise ValueError("[thresholds] config must be a table")
+    metrics = thresholds_config.get("metrics")
+    if metrics is not None and not (
+        isinstance(metrics, list)
+        and all(isinstance(metric, str) for metric in metrics)
+    ):
+        raise ValueError("thresholds.metrics must be a list of strings")
+    return thresholds_config
 
 
 def main() -> None:

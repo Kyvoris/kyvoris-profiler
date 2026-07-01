@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.7.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.7.1` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, and a command-line
 > interface. See
@@ -233,6 +233,14 @@ Fail CI when selected metrics regress beyond a threshold:
 python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --threshold-metric p95_ms --fail-on-regression
 ```
 
+Version `0.7.1` adds TOML config support for repeatable comparison settings:
+
+```powershell
+python -m kyvoris_profiler compare --config kyvoris-profiler.toml
+```
+
+Command-line arguments override values from the config file.
+
 ## API Overview
 
 ### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
@@ -433,6 +441,7 @@ python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --i
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format markdown --output reports\comparison-smoke.md
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format html --output reports\comparison-smoke.html
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
+python -m kyvoris_profiler compare --config kyvoris-profiler.toml --format markdown --output reports\config-comparison-smoke.md --max-regression-percent 100 --threshold-metric average_ms
 ```
 
 After installing the package locally, test the console script:

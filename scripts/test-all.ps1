@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.7.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.7.1', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -181,6 +181,18 @@ Invoke-Step "CLI threshold failure smoke test" {
         throw "Expected threshold comparison to exit with code 1, got $LASTEXITCODE"
     }
     $global:LASTEXITCODE = 0
+}
+
+Invoke-Step "CLI TOML config smoke test" {
+    Copy-Item -LiteralPath reports\baseline-smoke.json -Destination reports\baseline.json -Force
+    Copy-Item -LiteralPath reports\candidate-smoke.json -Destination reports\candidate.json -Force
+    python -m kyvoris_profiler compare --config kyvoris-profiler.toml --format markdown --output reports\config-comparison-smoke.md --max-regression-percent 100 --threshold-metric average_ms
+}
+
+Invoke-Step "CLI TOML config output validation" {
+    Assert-PathExists "reports\config-comparison-smoke.md"
+    Assert-FileContains "reports\config-comparison-smoke.md" "Benchmark Comparison"
+    Assert-FileContains "reports\config-comparison-smoke.md" "average_ms"
 }
 
 Invoke-Step "CLI async target smoke test" {

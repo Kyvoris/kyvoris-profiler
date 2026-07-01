@@ -19,6 +19,21 @@ implementation starts.
 - `release:0.5.0`
 - `release:0.6.0`
 - `release:0.7.0`
+- `release:0.7.1`
+
+## 0.7.1 Issues
+
+### Add TOML Comparison Config
+
+**Problem:** Teams should not need to repeat long comparison and threshold flags
+in every CI command.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler compare --config kyvoris-profiler.toml` works.
+- CLI arguments override config values.
+- Tests cover config loading and override behavior.
+- Test runner includes a config-based comparison smoke check.
 
 ## 0.7.0 Issues
 
@@ -44,6 +59,7 @@ custom Python scripts.
 - `kyvoris-profiler compare` supports `--threshold-metric`.
 - `--fail-on-regression` exits with code 1 when violations are found.
 - Test runner covers passing and failing threshold smoke checks.
+
 
 ## 0.6.0 Issues
 

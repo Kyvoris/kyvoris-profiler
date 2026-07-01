@@ -59,6 +59,9 @@ Threshold evaluation is modeled separately from comparison generation. This lets
 users create comparison reports without enforcing a policy, or apply a CI policy
 with explicit metric filters and allowed regression percentages. CLI threshold
 checks return exit code `1` only when `--fail-on-regression` is requested.
+TOML is used for repeatable comparison configuration because it is readable,
+matches the existing Python packaging ecosystem, and can be parsed with the
+standard library.
 
 ## Public API Principles
 
@@ -75,7 +78,7 @@ Create separate design documents for:
 - CLI callable argument passing and richer target configuration.
 - Async concurrency controls.
 - Richer HTTP endpoint configuration.
-- Per-metric threshold configuration files.
+- Per-metric threshold profiles and named policies.
 - Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.

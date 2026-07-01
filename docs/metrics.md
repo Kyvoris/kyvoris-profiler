@@ -338,3 +338,5 @@ peak_memory_kb: not GPU memory
 - Use CPU and memory metrics as supporting signals, not the only decision point.
 - Compare runs on the same machine, power mode, Python version, and dependency
   set whenever possible.
+- Keep threshold settings in `kyvoris-profiler.toml` when the same regression
+  policy should run repeatedly in CI.
