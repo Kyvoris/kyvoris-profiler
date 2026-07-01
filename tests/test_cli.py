@@ -602,6 +602,54 @@ def test_cli_history_lists_saved_records(tmp_path: Path) -> None:
     assert exit_code == 0
 
 
+def test_cli_history_list_filters_records(tmp_path: Path) -> None:
+    first_path = tmp_path / "first.json"
+    second_path = tmp_path / "second.json"
+    third_path = tmp_path / "third.json"
+    history_path = tmp_path / "history.jsonl"
+    write_json_report(first_path, 10.0)
+    write_json_report(second_path, 11.0)
+    write_json_report(third_path, 12.0)
+
+    for report_path, label, model in [
+        (first_path, "main", "a"),
+        (second_path, "main", "b"),
+        (third_path, "branch", "b"),
+    ]:
+        assert (
+            run(
+                [
+                    "history",
+                    "append",
+                    str(report_path),
+                    "--history",
+                    str(history_path),
+                    "--label",
+                    label,
+                    "--metadata",
+                    f"model={model}",
+                    "--no-environment-metadata",
+                ]
+            )
+            == 0
+        )
+
+    exit_code = run(
+        [
+            "history",
+            "list",
+            "--history",
+            str(history_path),
+            "--metadata",
+            "model=b",
+            "--limit",
+            "1",
+        ]
+    )
+
+    assert exit_code == 0
+
+
 def test_cli_history_compares_selected_records_by_index(tmp_path: Path) -> None:
     first_path = tmp_path / "first.json"
     second_path = tmp_path / "second.json"
@@ -714,6 +762,61 @@ def test_cli_history_compares_selected_records_by_label(tmp_path: Path) -> None:
     )
 
     assert exit_code == 1
+
+
+def test_cli_history_compares_latest_label_selectors(tmp_path: Path) -> None:
+    first_path = tmp_path / "first.json"
+    second_path = tmp_path / "second.json"
+    third_path = tmp_path / "third.json"
+    history_path = tmp_path / "history.jsonl"
+    output_path = tmp_path / "latest-label-comparison.md"
+    write_json_report(first_path, 10.0)
+    write_json_report(second_path, 11.0)
+    write_json_report(third_path, 8.0)
+
+    for report_path, label in [
+        (first_path, "main"),
+        (second_path, "branch"),
+        (third_path, "main"),
+    ]:
+        assert (
+            run(
+                [
+                    "history",
+                    "append",
+                    str(report_path),
+                    "--history",
+                    str(history_path),
+                    "--label",
+                    label,
+                    "--no-environment-metadata",
+                ]
+            )
+            == 0
+        )
+
+    exit_code = run(
+        [
+            "history",
+            "compare",
+            "--history",
+            str(history_path),
+            "--baseline",
+            "latest:branch",
+            "--candidate",
+            "latest:main",
+            "--format",
+            "markdown",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "Baseline: `branch`" in output
+    assert "Candidate: `main`" in output
 
 
 def test_format_history_list_includes_key_metadata(tmp_path: Path) -> None:

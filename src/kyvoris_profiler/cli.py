@@ -21,6 +21,7 @@ from kyvoris_profiler import (
     compare_profiles,
     collect_environment_metadata,
     evaluate_thresholds,
+    filter_history_records,
     latest_pair,
     profile_async_callable,
     profile_callable,
@@ -180,6 +181,22 @@ def build_history_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("reports/history.jsonl"),
         help="History JSONL path. Default: reports/history.jsonl.",
+    )
+    list_parser.add_argument(
+        "--label",
+        help="Only show records with this label.",
+    )
+    list_parser.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="Only show records with matching metadata. Can be passed multiple times.",
+    )
+    list_parser.add_argument(
+        "--limit",
+        type=int,
+        help="Show only the latest N matching records.",
     )
 
     compare_parser = subparsers.add_parser(
@@ -467,6 +484,12 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
 
         if args.history_command == "list":
             records = read_history(args.history)
+            records = filter_history_records(
+                records,
+                label=args.label,
+                metadata=parse_metadata_args(args.metadata),
+                limit=args.limit,
+            )
             print(format_history_list(records))
             return 0
 

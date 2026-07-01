@@ -82,6 +82,13 @@ release note draft.
 - Reuse comparison output formats and threshold checks.
 - Keep `history compare-latest` as a shortcut.
 
+## Week 12: 0.12.0 History Filtering
+
+- Filter `history list` by label.
+- Filter `history list` by metadata.
+- Limit list output to the latest N matching records.
+- Add `latest:LABEL` selectors for comparisons.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

@@ -177,14 +177,14 @@ Version `0.7.1` lets comparison settings come from TOML:
 python -m kyvoris_profiler compare --config kyvoris-profiler.toml
 ```
 
-Version `0.11.0` supports benchmark history for saved JSON reports with
+Version `0.12.0` supports benchmark history for saved JSON reports with
 metadata:
 
 ```powershell
 python -m kyvoris_profiler history append reports\baseline.json --history reports\history.jsonl --label baseline --metadata model=distilbert
 python -m kyvoris_profiler history append reports\candidate.json --history reports\history.jsonl --label candidate --metadata model=roberta
-python -m kyvoris_profiler history list --history reports\history.jsonl
-python -m kyvoris_profiler history compare --history reports\history.jsonl --baseline baseline --candidate candidate --format markdown --output reports\history-selected-comparison.md
+python -m kyvoris_profiler history list --history reports\history.jsonl --metadata model=roberta --limit 5
+python -m kyvoris_profiler history compare --history reports\history.jsonl --baseline latest:baseline --candidate latest:candidate --format markdown --output reports\history-selected-comparison.md
 python -m kyvoris_profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
 ```
 

@@ -128,13 +128,46 @@ def latest_pair(history_path: Path) -> tuple[HistoryRecord, HistoryRecord]:
     return records[-2], records[-1]
 
 
+def filter_history_records(
+    records: list[HistoryRecord],
+    label: str | None = None,
+    metadata: dict[str, str] | None = None,
+    limit: int | None = None,
+) -> list[HistoryRecord]:
+    """Filter history records by label, metadata, and optional latest count."""
+    filtered = records
+    if label is not None:
+        filtered = [record for record in filtered if record.label == label]
+    if metadata:
+        filtered = [
+            record
+            for record in filtered
+            if _metadata_matches(record.metadata or {}, metadata)
+        ]
+    if limit is not None:
+        if limit < 1:
+            raise ValueError("limit must be greater than zero")
+        filtered = filtered[-limit:]
+    return filtered
+
+
 def select_history_record(
     records: list[HistoryRecord],
     selector: str,
 ) -> HistoryRecord:
-    """Select a history record by 1-based index or label."""
+    """Select a history record by 1-based index, label, or latest:label."""
     if not records:
         raise ValueError("history contains no records")
+
+    latest_prefix = "latest:"
+    if selector.startswith(latest_prefix):
+        label = selector[len(latest_prefix) :]
+        if not label:
+            raise ValueError("latest selector must use latest:LABEL")
+        matches = [record for record in records if record.label == label]
+        if not matches:
+            raise ValueError(f"history label not found: {label}")
+        return matches[-1]
 
     try:
         index = int(selector)
@@ -165,6 +198,16 @@ def select_history_pair(
     return (
         select_history_record(records, baseline_selector),
         select_history_record(records, candidate_selector),
+    )
+
+
+def _metadata_matches(
+    record_metadata: dict[str, str],
+    expected_metadata: dict[str, str],
+) -> bool:
+    return all(
+        record_metadata.get(key) == value
+        for key, value in expected_metadata.items()
     )
 
 

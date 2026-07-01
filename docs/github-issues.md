@@ -24,6 +24,34 @@ implementation starts.
 - `release:0.9.0`
 - `release:0.10.0`
 - `release:0.11.0`
+- `release:0.12.0`
+
+## 0.12.0 Issues
+
+### Add History List Filters
+
+**Problem:** History files become noisy after many benchmark runs.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler history list --label LABEL` filters by label.
+- `kyvoris-profiler history list --metadata KEY=VALUE` filters by metadata.
+- `kyvoris-profiler history list --limit N` returns the latest N matching
+  records.
+- Tests cover label, metadata, and limit filtering.
+
+### Add Latest Label Selectors
+
+**Problem:** Users often want to compare the latest record for each label without
+looking up indexes manually.
+
+**Acceptance criteria:**
+
+- `latest:LABEL` selects the latest matching record.
+- `history compare --baseline latest:baseline --candidate latest:candidate`
+  works.
+- Missing labels produce a clear error.
+- Test runner includes a latest-label comparison smoke check.
 
 ## 0.11.0 Issues
 

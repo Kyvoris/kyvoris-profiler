@@ -362,3 +362,32 @@ Closes #24
 Closes #25
 Closes #26
 ```
+
+## Example for 0.12.0
+
+```markdown
+## Summary
+
+- Added history list filtering by label, metadata, and limit.
+- Added `latest:LABEL` selectors for history comparison.
+- Updated tests, docs, release notes, and test runner coverage for `0.12.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added filtered history listing and latest-label comparison selectors.
+
+## Risk
+
+- Low. Filtering is additive and existing index/label selectors still work.
+
+## Linked Issues
+
+Closes #27
+Closes #28
+```

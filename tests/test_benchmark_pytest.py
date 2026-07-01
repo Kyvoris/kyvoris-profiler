@@ -17,6 +17,7 @@ from kyvoris_profiler import (
     collect_environment_metadata,
     compare_profiles,
     evaluate_thresholds,
+    filter_history_records,
     format_comparison_csv_report,
     format_comparison_html_report,
     format_comparison_json_report,
@@ -436,6 +437,54 @@ def test_history_records_can_be_selected_by_index_or_label(tmp_path: Path) -> No
     assert candidate.label == "second"
 
 
+def test_history_records_can_be_filtered(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    append_history_record(
+        history_path,
+        summarize_profile([1.0]),
+        label="main",
+        metadata={"model": "a"},
+    )
+    append_history_record(
+        history_path,
+        summarize_profile([2.0]),
+        label="main",
+        metadata={"model": "b"},
+    )
+    append_history_record(
+        history_path,
+        summarize_profile([3.0]),
+        label="branch",
+        metadata={"model": "b"},
+    )
+    records = read_history(history_path)
+
+    assert [
+        record.summary.average_ms
+        for record in filter_history_records(records, label="main")
+    ] == [1.0, 2.0]
+    assert [
+        record.label
+        for record in filter_history_records(records, metadata={"model": "b"})
+    ] == ["main", "branch"]
+    assert [
+        record.summary.average_ms
+        for record in filter_history_records(records, limit=2)
+    ] == [2.0, 3.0]
+
+
+def test_latest_label_selector_uses_latest_matching_record(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    append_history_record(history_path, summarize_profile([1.0]), label="main")
+    append_history_record(history_path, summarize_profile([2.0]), label="branch")
+    append_history_record(history_path, summarize_profile([3.0]), label="main")
+    records = read_history(history_path)
+
+    selected = select_history_record(records, "latest:main")
+
+    assert selected.summary.average_ms == 3.0
+
+
 def test_history_record_selection_rejects_ambiguous_labels(tmp_path: Path) -> None:
     history_path = tmp_path / "history.jsonl"
     append_history_record(history_path, summarize_profile([1.0]), label="same")
@@ -443,3 +492,8 @@ def test_history_record_selection_rejects_ambiguous_labels(tmp_path: Path) -> No
 
     with pytest.raises(ValueError, match="ambiguous"):
         select_history_pair(history_path, "same", "2")
+
+
+def test_history_filter_rejects_non_positive_limit() -> None:
+    with pytest.raises(ValueError, match="limit"):
+        filter_history_records([], limit=0)

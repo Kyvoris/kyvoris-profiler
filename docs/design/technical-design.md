@@ -91,6 +91,13 @@ language. Numeric selectors are 1-based indexes from `history list`; non-numeric
 selectors match unique labels. Duplicate labels are rejected for label-based
 selection so users do not accidentally compare the wrong records.
 
+## 0.12.0 Design Decision
+
+History filtering is intentionally exact-match only. Label filters match the
+record label, metadata filters match flat `KEY=VALUE` pairs, and limit is applied
+after filters so users get the latest matching records. `latest:LABEL` is added
+as a small selector form instead of a broader query language.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

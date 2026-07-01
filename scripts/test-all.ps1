@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.11.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.12.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -168,14 +168,28 @@ Invoke-Step "CLI history list output validation" {
     Assert-FileContains "reports\history-list-smoke.txt" "model=baseline-demo"
 }
 
+Invoke-Step "CLI filtered history list smoke test" {
+    python -m kyvoris_profiler history list --history reports\history-smoke.jsonl --metadata model=candidate-demo --limit 1 | Tee-Object -FilePath reports\history-filtered-list-smoke.txt
+}
+
+Invoke-Step "CLI filtered history list output validation" {
+    Assert-FileContains "reports\history-filtered-list-smoke.txt" "model=candidate-demo"
+    Assert-FileContains "reports\history-filtered-list-smoke.txt" "candidate"
+}
+
 Invoke-Step "CLI selected history comparison smoke test" {
     python -m kyvoris_profiler history compare --history reports\history-smoke.jsonl --baseline 1 --candidate 2 --format markdown --output reports\history-selected-comparison-smoke.md
+}
+
+Invoke-Step "CLI latest label history comparison smoke test" {
+    python -m kyvoris_profiler history compare --history reports\history-smoke.jsonl --baseline latest:baseline --candidate latest:candidate --format markdown --output reports\history-latest-label-comparison-smoke.md
 }
 
 Invoke-Step "CLI selected history comparison validation" {
     Assert-FileContains "reports\history-selected-comparison-smoke.md" "Benchmark History Comparison"
     Assert-FileContains "reports\history-selected-comparison-smoke.md" 'Baseline: `baseline`'
     Assert-FileContains "reports\history-selected-comparison-smoke.md" 'Candidate: `candidate`'
+    Assert-FileContains "reports\history-latest-label-comparison-smoke.md" "Benchmark History Comparison"
 }
 
 Invoke-Step "CLI history comparison smoke test" {

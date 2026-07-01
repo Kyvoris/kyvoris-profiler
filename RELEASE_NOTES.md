@@ -1,5 +1,28 @@
 # Release Notes
 
+## 0.12.0
+
+`0.12.0` adds filtering for benchmark history and latest-label selectors.
+
+### Added
+
+- Public `filter_history_records()` helper.
+- `kyvoris-profiler history list --label`.
+- `kyvoris-profiler history list --metadata KEY=VALUE`.
+- `kyvoris-profiler history list --limit N`.
+- `latest:LABEL` selectors for `kyvoris-profiler history compare`.
+- Test runner coverage for filtered history lists and latest-label comparison.
+
+### Changed
+
+- Project metadata version is now `0.12.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.11.0
 
 `0.11.0` adds targeted benchmark history comparisons.

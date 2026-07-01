@@ -20,6 +20,7 @@ from kyvoris_profiler.history import (
     append_history_from_report,
     append_history_record,
     collect_environment_metadata,
+    filter_history_records,
     latest_pair,
     read_history,
     read_summary_report,
@@ -59,6 +60,7 @@ __all__ = [
     "compare_profiles",
     "collect_environment_metadata",
     "evaluate_thresholds",
+    "filter_history_records",
     "format_comparison_html_report",
     "format_comparison_json_report",
     "format_comparison_markdown_report",
@@ -84,4 +86,4 @@ __all__ = [
     "summarize_profile",
 ]
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"
