@@ -60,3 +60,34 @@ Closes #1
 Closes #2
 Closes #3
 ```
+
+## Example for 0.3.0
+
+```markdown
+## Summary
+
+- Added `profile_callable()` for opt-in resource profiling.
+- Added process CPU time and peak Python-traced memory metrics.
+- Updated reports, examples, docs, tests, and release notes for `0.3.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+
+## Release Notes
+
+- Added CPU and memory profiling support.
+- Preserved `benchmark_callable()` compatibility for latency-only usage.
+
+## Risk
+
+- Low. Resource collection is opt-in, and the default latency-only behavior
+  remains unchanged.
+
+## Linked Issues
+
+Closes #4
+Closes #5
+Closes #6
+```

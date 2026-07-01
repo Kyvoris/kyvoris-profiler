@@ -14,8 +14,8 @@ release note draft.
 
 ## Week 2: 0.3.0 Metrics Expansion
 
-- Add memory profiling for peak process memory.
-- Add optional CPU usage snapshots.
+- Add memory profiling for peak Python-traced allocations.
+- Add optional process CPU time metrics.
 - Document measurement limits clearly.
 - Add tests for metric collection fallbacks.
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from kyvoris_profiler import benchmark_callable, format_text_report
+from kyvoris_profiler import format_text_report, profile_callable
 
 
 def simulated_inference() -> str:
@@ -14,5 +14,11 @@ def simulated_inference() -> str:
 
 
 if __name__ == "__main__":
-    result = benchmark_callable(simulated_inference, iterations=5, warmup=1)
+    result = profile_callable(
+        simulated_inference,
+        iterations=5,
+        warmup=1,
+        collect_cpu=True,
+        collect_memory=True,
+    )
     print(format_text_report(result, title="Simulated Inference Benchmark"))

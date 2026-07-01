@@ -14,6 +14,43 @@ implementation starts.
 - `area:cli`
 - `area:metrics`
 - `release:0.2.0`
+- `release:0.3.0`
+
+## 0.3.0 Issues
+
+### Add Resource Profiling API
+
+**Problem:** Latency alone does not show whether an inference path is CPU-heavy
+or creates avoidable Python allocations.
+
+**Acceptance criteria:**
+
+- Public `profile_callable()` API exists.
+- Existing `benchmark_callable()` behavior remains compatible.
+- Resource collection is opt-in.
+- Tests cover latency-only and resource-enabled behavior.
+
+### Add Process CPU Time Metrics
+
+**Problem:** Benchmarks need a lightweight CPU signal without adding platform
+dependencies.
+
+**Acceptance criteria:**
+
+- `collect_cpu=True` records process CPU time per measured iteration.
+- Summary includes average, minimum, and maximum CPU time.
+- Reports include CPU metrics only when collected.
+
+### Add Peak Python Memory Metrics
+
+**Problem:** Benchmarks need a first memory signal for Python-heavy inference
+wrappers, preprocessing, and postprocessing.
+
+**Acceptance criteria:**
+
+- `collect_memory=True` records peak Python-traced allocations.
+- Documentation clearly states that this is not GPU or full native memory.
+- Reports include memory metrics only when collected.
 
 ## 0.2.0 Issues
 

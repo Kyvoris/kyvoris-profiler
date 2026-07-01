@@ -23,6 +23,14 @@ from latency statistics.
 JSON and HTML are formatter concerns, so they belong in `report.py`. The JSON
 report includes a `schema_version` so future tooling can detect changes.
 
+## 0.3.0 Design Decision
+
+`profile_callable()` adds opt-in resource metrics while `benchmark_callable()`
+remains a compatibility-friendly latency entry point. CPU collection uses
+process CPU time from the Python standard library. Memory collection uses
+`tracemalloc`, which captures Python-traced allocations and intentionally avoids
+claiming full process, native framework, or GPU memory coverage.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
@@ -36,7 +44,7 @@ report includes a `schema_version` so future tooling can detect changes.
 Create separate design documents for:
 
 - CLI command architecture.
-- Memory, CPU, and GPU metrics.
+- Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.
 - Adapter APIs for local models and remote endpoints.

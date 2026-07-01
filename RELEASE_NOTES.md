@@ -1,5 +1,32 @@
 # Release Notes
 
+## 0.3.0
+
+`0.3.0` expands Kyvoris Profiler from latency-only benchmarking into opt-in
+resource profiling.
+
+### Added
+
+- `profile_callable()` for latency plus optional resource metrics.
+- Optional process CPU time collection with `collect_cpu=True`.
+- Optional peak Python-traced memory collection with `collect_memory=True`.
+- `ProfileSummary` as the primary summary type.
+- Resource metric rows in text, Markdown, JSON, and HTML reports.
+- Tests for CPU, memory, validation, and report output behavior.
+
+### Changed
+
+- `benchmark_callable()` now delegates to `profile_callable()` while preserving
+  existing latency-only behavior.
+- `LatencySummary` remains available as a compatibility alias for
+  `ProfileSummary`.
+- Project metadata version is now `0.3.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+
 ## 0.2.0
 
 `0.2.0` turns Kyvoris Profiler from a basic latency helper into a more

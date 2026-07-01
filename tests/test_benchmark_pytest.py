@@ -9,13 +9,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from kyvoris_profiler import (
     LatencySummary,
+    ProfileSummary,
     benchmark_callable,
     format_html_report,
     format_json_report,
     format_markdown_report,
     format_text_report,
     percentile,
+    profile_callable,
     summarize_latencies,
+    summarize_profile,
 )
 
 
@@ -26,6 +29,7 @@ def test_benchmark_callable_reports_summary_stats() -> None:
     stats = benchmark_callable(target, iterations=5)
 
     assert isinstance(stats, LatencySummary)
+    assert isinstance(stats, ProfileSummary)
     assert stats.iterations == 5
     assert stats.warmup_iterations == 0
     assert stats.average_ms > 0.0
@@ -59,6 +63,25 @@ def test_benchmark_callable_rejects_negative_warmup() -> None:
         benchmark_callable(lambda: None, warmup=-1)
 
 
+def test_profile_callable_can_collect_resource_metrics() -> None:
+    def target() -> list[int]:
+        return [index for index in range(100)]
+
+    stats = profile_callable(
+        target,
+        iterations=3,
+        collect_cpu=True,
+        collect_memory=True,
+    )
+
+    assert stats.iterations == 3
+    assert stats.average_cpu_ms is not None
+    assert stats.min_cpu_ms is not None
+    assert stats.max_cpu_ms is not None
+    assert stats.peak_memory_kb is not None
+    assert stats.peak_memory_kb >= 0.0
+
+
 def test_summarize_latencies_reports_expected_values() -> None:
     stats = summarize_latencies([1.0, 2.0, 3.0, 4.0], warmup_iterations=2)
 
@@ -71,6 +94,14 @@ def test_summarize_latencies_reports_expected_values() -> None:
     assert stats.warmup_iterations == 2
 
 
+def test_summarize_profile_validates_resource_metrics() -> None:
+    with pytest.raises(ValueError):
+        summarize_profile([1.0, 2.0], cpu_times_ms=[1.0])
+
+    with pytest.raises(ValueError):
+        summarize_profile([1.0], peak_memory_kb=-1.0)
+
+
 def test_percentile_validates_inputs() -> None:
     with pytest.raises(ValueError):
         percentile([], 50.0)
@@ -80,7 +111,12 @@ def test_percentile_validates_inputs() -> None:
 
 
 def test_report_formatters_include_key_metrics() -> None:
-    stats = summarize_latencies([1.0, 2.0, 3.0], warmup_iterations=1)
+    stats = summarize_profile(
+        [1.0, 2.0, 3.0],
+        warmup_iterations=1,
+        cpu_times_ms=[0.1, 0.2, 0.3],
+        peak_memory_kb=42.5,
+    )
 
     text_report = format_text_report(stats)
     markdown_report = format_markdown_report(stats)
@@ -89,8 +125,11 @@ def test_report_formatters_include_key_metrics() -> None:
 
     assert "Benchmark Results" in text_report
     assert "Iterations: 3" in text_report
-    assert "Warmup:     1" in text_report
+    assert "Warmup: 1" in text_report
+    assert "Peak Python Memory: 42.500 KB" in text_report
     assert "| Average | 2.000 ms |" in markdown_report
-    assert json.loads(json_report)["metrics"]["warmup_iterations"] == 1
+    metrics = json.loads(json_report)["metrics"]
+    assert metrics["warmup_iterations"] == 1
+    assert metrics["peak_memory_kb"] == 42.5
     assert "<!doctype html>" in html_report
     assert "<th>Warmup</th><td>1</td>" in html_report

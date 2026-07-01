@@ -95,17 +95,41 @@ Example output:
 Real Model Inference Benchmark
 ------------------------------
 Iterations: 10
-Warmup:     1
-Average:    32.415 ms
-Minimum:    29.880 ms
-Maximum:    41.203 ms
-P50:        31.702 ms
-P95:        39.484 ms
+Warmup: 1
+Average: 32.415 ms
+Minimum: 29.880 ms
+Maximum: 41.203 ms
+P50: 31.702 ms
+P95: 39.484 ms
+Average CPU: 26.115 ms
+Minimum CPU: 22.904 ms
+Maximum CPU: 35.001 ms
+Peak Python Memory: 85.250 KB
 
 Model: distilbert-base-uncased-finetuned-sst-2-english
 Input: Kyvoris Profiler makes inference benchmarking simple.
 Sample output: [{'label': 'POSITIVE', 'score': 0.999...}]
 ```
+
+## Resource Metrics
+
+Version `0.3.0` adds `profile_callable()` for optional resource metrics:
+
+```python
+from kyvoris_profiler import profile_callable
+
+result = profile_callable(
+    run_inference,
+    iterations=10,
+    warmup=1,
+    collect_cpu=True,
+    collect_memory=True,
+)
+```
+
+CPU metrics use process CPU time. Memory metrics use Python's `tracemalloc` and
+represent Python-traced allocations, not GPU memory or every native framework
+allocation.
 
 - `Average` is the mean latency across all measured inference calls.
 - `Minimum` is the fastest measured call.

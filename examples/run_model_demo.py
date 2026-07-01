@@ -6,7 +6,7 @@ captures inference latency rather than setup time.
 
 from __future__ import annotations
 
-from kyvoris_profiler import benchmark_callable, format_text_report
+from kyvoris_profiler import format_text_report, profile_callable
 
 
 MODEL_NAME = "distilbert-base-uncased-finetuned-sst-2-english"
@@ -30,7 +30,13 @@ def main() -> None:
 
     sample_output = run_inference()
 
-    result = benchmark_callable(run_inference, iterations=10, warmup=1)
+    result = profile_callable(
+        run_inference,
+        iterations=10,
+        warmup=1,
+        collect_cpu=True,
+        collect_memory=True,
+    )
 
     print(format_text_report(result, title="Real Model Inference Benchmark"))
     print()

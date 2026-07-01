@@ -5,27 +5,44 @@ from __future__ import annotations
 import json
 from html import escape
 
-from kyvoris_profiler.metrics import LatencySummary
+from kyvoris_profiler.metrics import ProfileSummary
 
 
-def format_text_report(summary: LatencySummary, title: str = "Benchmark Results") -> str:
+def _metric_rows(summary: ProfileSummary) -> list[tuple[str, str]]:
+    rows = [
+        ("Iterations", str(summary.iterations)),
+        ("Warmup", str(summary.warmup_iterations)),
+        ("Average", f"{summary.average_ms:.3f} ms"),
+        ("Minimum", f"{summary.min_ms:.3f} ms"),
+        ("Maximum", f"{summary.max_ms:.3f} ms"),
+        ("P50", f"{summary.p50_ms:.3f} ms"),
+        ("P95", f"{summary.p95_ms:.3f} ms"),
+    ]
+    if summary.average_cpu_ms is not None:
+        rows.extend(
+            [
+                ("Average CPU", f"{summary.average_cpu_ms:.3f} ms"),
+                ("Minimum CPU", f"{summary.min_cpu_ms:.3f} ms"),
+                ("Maximum CPU", f"{summary.max_cpu_ms:.3f} ms"),
+            ]
+        )
+    if summary.peak_memory_kb is not None:
+        rows.append(("Peak Python Memory", f"{summary.peak_memory_kb:.3f} KB"))
+    return rows
+
+
+def format_text_report(summary: ProfileSummary, title: str = "Benchmark Results") -> str:
     """Format a latency summary as a readable plain-text report."""
     lines = [
         title,
         "-" * len(title),
-        f"Iterations: {summary.iterations}",
-        f"Warmup:     {summary.warmup_iterations}",
-        f"Average:    {summary.average_ms:.3f} ms",
-        f"Minimum:    {summary.min_ms:.3f} ms",
-        f"Maximum:    {summary.max_ms:.3f} ms",
-        f"P50:        {summary.p50_ms:.3f} ms",
-        f"P95:        {summary.p95_ms:.3f} ms",
     ]
+    lines.extend(f"{metric}: {value}" for metric, value in _metric_rows(summary))
     return "\n".join(lines)
 
 
 def format_markdown_report(
-    summary: LatencySummary,
+    summary: ProfileSummary,
     title: str = "Benchmark Results",
 ) -> str:
     """Format a latency summary as a Markdown table."""
@@ -35,19 +52,13 @@ def format_markdown_report(
             "",
             "| Metric | Value |",
             "| --- | ---: |",
-            f"| Iterations | {summary.iterations} |",
-            f"| Warmup | {summary.warmup_iterations} |",
-            f"| Average | {summary.average_ms:.3f} ms |",
-            f"| Minimum | {summary.min_ms:.3f} ms |",
-            f"| Maximum | {summary.max_ms:.3f} ms |",
-            f"| P50 | {summary.p50_ms:.3f} ms |",
-            f"| P95 | {summary.p95_ms:.3f} ms |",
+            *[f"| {metric} | {value} |" for metric, value in _metric_rows(summary)],
         ]
     )
 
 
 def format_json_report(
-    summary: LatencySummary,
+    summary: ProfileSummary,
     title: str = "Benchmark Results",
 ) -> str:
     """Format a latency summary as a stable JSON document."""
@@ -60,20 +71,12 @@ def format_json_report(
 
 
 def format_html_report(
-    summary: LatencySummary,
+    summary: ProfileSummary,
     title: str = "Benchmark Results",
 ) -> str:
     """Format a latency summary as a standalone HTML report."""
     safe_title = escape(title)
-    rows = [
-        ("Iterations", str(summary.iterations)),
-        ("Warmup", str(summary.warmup_iterations)),
-        ("Average", f"{summary.average_ms:.3f} ms"),
-        ("Minimum", f"{summary.min_ms:.3f} ms"),
-        ("Maximum", f"{summary.max_ms:.3f} ms"),
-        ("P50", f"{summary.p50_ms:.3f} ms"),
-        ("P95", f"{summary.p95_ms:.3f} ms"),
-    ]
+    rows = _metric_rows(summary)
     table_rows = "\n".join(
         f"        <tr><th>{escape(metric)}</th><td>{escape(value)}</td></tr>"
         for metric, value in rows

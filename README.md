@@ -7,8 +7,8 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.2.0` focuses on latency measurement,
-> warmup-aware benchmarks, metric summaries, and structured reports. See
+> Project status: early alpha. Version `0.3.0` focuses on latency measurement,
+> warmup-aware benchmarks, optional CPU and memory metrics, and structured reports. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -20,6 +20,7 @@ measuring that repeated behavior.
 - Measure repeated inference latency in milliseconds.
 - Capture average, minimum, maximum, p50, and p95 latency.
 - Run warmup iterations before measured iterations.
+- Optionally collect process CPU time and peak Python memory allocations.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, or HTML reports.
 - Keep the core package free of runtime dependencies.
@@ -55,7 +56,7 @@ python examples\run_demo.py
 ```python
 import time
 
-from kyvoris_profiler import benchmark_callable, format_text_report
+from kyvoris_profiler import format_text_report, profile_callable
 
 
 def run_inference() -> str:
@@ -63,7 +64,13 @@ def run_inference() -> str:
     return "ok"
 
 
-summary = benchmark_callable(run_inference, iterations=20, warmup=2)
+summary = profile_callable(
+    run_inference,
+    iterations=20,
+    warmup=2,
+    collect_cpu=True,
+    collect_memory=True,
+)
 print(format_text_report(summary, title="Inference Benchmark"))
 ```
 
@@ -73,12 +80,16 @@ Example output:
 Inference Benchmark
 -------------------
 Iterations: 20
-Warmup:     2
-Average:    5.100 ms
-Minimum:    5.000 ms
-Maximum:    5.400 ms
-P50:        5.080 ms
-P95:        5.320 ms
+Warmup: 2
+Average: 5.100 ms
+Minimum: 5.000 ms
+Maximum: 5.400 ms
+P50: 5.080 ms
+P95: 5.320 ms
+Average CPU: 0.120 ms
+Minimum CPU: 0.090 ms
+Maximum CPU: 0.180 ms
+Peak Python Memory: 4.250 KB
 ```
 
 ## Real Model Example
@@ -109,11 +120,16 @@ Expected output shape:
 Real Model Inference Benchmark
 ------------------------------
 Iterations: 10
-Average:    32.415 ms
-Minimum:    29.880 ms
-Maximum:    41.203 ms
-P50:        31.702 ms
-P95:        39.484 ms
+Warmup: 1
+Average: 32.415 ms
+Minimum: 29.880 ms
+Maximum: 41.203 ms
+P50: 31.702 ms
+P95: 39.484 ms
+Average CPU: 26.115 ms
+Minimum CPU: 22.904 ms
+Maximum CPU: 35.001 ms
+Peak Python Memory: 85.250 KB
 
 Model: distilbert-base-uncased-finetuned-sst-2-english
 Input: Kyvoris Profiler makes inference benchmarking simple.
@@ -138,6 +154,25 @@ Warmup calls run before timing starts.
 summary = benchmark_callable(run_inference, iterations=10, warmup=1)
 ```
 
+### `profile_callable(callable_obj, iterations=10, warmup=0, collect_memory=False, collect_cpu=False)`
+
+Runs the same benchmark loop as `benchmark_callable()`, with optional resource
+metrics:
+
+```python
+summary = profile_callable(
+    run_inference,
+    iterations=10,
+    warmup=1,
+    collect_memory=True,
+    collect_cpu=True,
+)
+```
+
+`collect_memory=True` records peak Python allocations observed by `tracemalloc`.
+It does not include GPU memory or every native allocation made by model
+frameworks. `collect_cpu=True` records process CPU time consumed by the callable.
+
 The callable can wrap:
 
 - a local model inference call
@@ -146,7 +181,7 @@ The callable can wrap:
 - a preprocessing or postprocessing function
 - any other repeatable unit of work
 
-### `LatencySummary`
+### `ProfileSummary`
 
 Immutable dataclass containing:
 
@@ -159,6 +194,10 @@ Immutable dataclass containing:
 | `p95_ms` | Slower-end latency often useful for user-facing performance |
 | `iterations` | Number of measured runs |
 | `warmup_iterations` | Number of untimed warmup runs before measurement |
+| `average_cpu_ms` | Average process CPU time when CPU collection is enabled |
+| `min_cpu_ms` | Minimum process CPU time when CPU collection is enabled |
+| `max_cpu_ms` | Maximum process CPU time when CPU collection is enabled |
+| `peak_memory_kb` | Peak Python-traced memory allocation when memory collection is enabled |
 
 Use `summary.as_dict()` when you need a plain dictionary for serialization or
 custom reporting.
@@ -230,6 +269,8 @@ python -m unittest discover -s tests
 
 - Keep the benchmark core small, explicit, and easy to audit.
 - Make units obvious: latency values are reported in milliseconds.
+- Make resource metric scope explicit: memory is Python-traced allocation, CPU
+  is process CPU time.
 - Separate measurement, metric calculation, and report formatting.
 - Avoid provider lock-in; the callable wrapper decides what is being measured.
 - Keep optional model dependencies out of the core package.
@@ -243,6 +284,7 @@ Planned areas include:
 - exception capture for failed iterations
 - support for callables with arguments
 - inference-specific metrics such as tokens per second and time to first token
+- native process, GPU, and framework-specific memory adapters
 - comparison reports for multiple benchmark runs
 
 See [docs/roadmap.md](docs/roadmap.md) for the full roadmap, and

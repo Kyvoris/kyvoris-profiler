@@ -9,6 +9,8 @@ currently focused on a small, dependable core before adding heavier integrations
 - Latency summaries with average, minimum, maximum, p50, and p95 values.
 - Plain-text, Markdown, JSON, and HTML report formatting.
 - Warmup iterations before measurement.
+- Optional process CPU time metrics.
+- Optional peak Python-traced memory metrics.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Minimal dependency footprint.
@@ -41,6 +43,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Input and output token counts.
 - Time to first token for streaming workloads.
 - Request success and failure counts.
+- Native process, GPU, and framework-specific memory adapters.
 
 ### 5. Reporting
 
