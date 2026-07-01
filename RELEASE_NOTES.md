@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.7.0
+
+`0.7.0` adds threshold evaluation for CI-friendly performance regression gates.
+
+### Added
+
+- `evaluate_thresholds()` for checking comparison regressions against an allowed
+  percentage.
+- `ThresholdViolation` and `ThresholdEvaluation` dataclasses.
+- CLI comparison flags:
+  - `--max-regression-percent`
+  - `--threshold-metric`
+  - `--fail-on-regression`
+- Test runner smoke checks for passing and failing threshold behavior.
+- Tests for threshold API validation and CLI exit codes.
+
+### Changed
+
+- Project metadata version is now `0.7.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.6.0
 
 `0.6.0` adds benchmark comparison utilities for branch-to-branch,

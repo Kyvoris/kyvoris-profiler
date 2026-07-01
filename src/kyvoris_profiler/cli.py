@@ -16,6 +16,7 @@ from typing import Any
 from kyvoris_profiler import (
     __version__,
     compare_profiles,
+    evaluate_thresholds,
     profile_async_callable,
     profile_callable,
 )
@@ -103,6 +104,22 @@ def build_compare_parser() -> argparse.ArgumentParser:
         "--title",
         default="Benchmark Comparison",
         help="Comparison report title. Default: Benchmark Comparison.",
+    )
+    parser.add_argument(
+        "--max-regression-percent",
+        type=float,
+        help="Allowed regression percentage before threshold violation.",
+    )
+    parser.add_argument(
+        "--threshold-metric",
+        action="append",
+        dest="threshold_metrics",
+        help="Metric to evaluate against the threshold. Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help="Exit with code 1 when threshold violations are found.",
     )
     return parser
 
@@ -214,6 +231,13 @@ def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
             baseline_label=args.baseline_label,
             candidate_label=args.candidate_label,
         )
+        threshold_evaluation = None
+        if args.max_regression_percent is not None:
+            threshold_evaluation = evaluate_thresholds(
+                comparison,
+                max_regression_percent=args.max_regression_percent,
+                metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
+            )
     except Exception as exc:
         parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
 
@@ -225,6 +249,25 @@ def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
         args.output.write_text(report + "\n", encoding="utf-8")
     else:
         print(report)
+
+    if threshold_evaluation is not None:
+        if threshold_evaluation.passed:
+            print("Threshold check: passed", file=sys.stderr)
+        else:
+            print("Threshold check: failed", file=sys.stderr)
+            for violation in threshold_evaluation.violations:
+                change = (
+                    "n/a"
+                    if violation.percent_change is None
+                    else f"{violation.percent_change:+.2f}%"
+                )
+                print(
+                    f"- {violation.metric}: {change} "
+                    f"(allowed {violation.allowed_regression_percent:.2f}%)",
+                    file=sys.stderr,
+                )
+            if args.fail_on_regression:
+                return 1
 
     return 0
 

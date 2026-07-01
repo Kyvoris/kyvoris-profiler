@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.6.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.7.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -133,6 +133,54 @@ Invoke-Step "CLI comparison HTML output smoke test" {
 Invoke-Step "CLI comparison HTML output validation" {
     Assert-FileContains "reports\comparison-smoke.html" "<!doctype html>"
     Assert-FileContains "reports\comparison-smoke.html" "Benchmark Comparison"
+}
+
+Invoke-Step "CLI threshold pass smoke test" {
+    python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
+}
+
+Invoke-Step "CLI threshold failure smoke test" {
+    $baseline = @{
+        schema_version = "1.0"
+        metrics = @{
+            average_ms = 10.0
+            min_ms = 10.0
+            max_ms = 10.0
+            p50_ms = 10.0
+            p95_ms = 10.0
+            iterations = 1
+            warmup_iterations = 0
+            failed_iterations = 0
+            average_cpu_ms = $null
+            min_cpu_ms = $null
+            max_cpu_ms = $null
+            peak_memory_kb = $null
+        }
+    }
+    $candidate = @{
+        schema_version = "1.0"
+        metrics = @{
+            average_ms = 12.0
+            min_ms = 12.0
+            max_ms = 12.0
+            p50_ms = 12.0
+            p95_ms = 12.0
+            iterations = 1
+            warmup_iterations = 0
+            failed_iterations = 0
+            average_cpu_ms = $null
+            min_cpu_ms = $null
+            max_cpu_ms = $null
+            peak_memory_kb = $null
+        }
+    }
+    $baseline | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath reports\threshold-baseline.json -Encoding ASCII
+    $candidate | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath reports\threshold-candidate.json -Encoding ASCII
+    python -m kyvoris_profiler compare reports\threshold-baseline.json reports\threshold-candidate.json --max-regression-percent 5 --threshold-metric average_ms --fail-on-regression
+    if ($LASTEXITCODE -ne 1) {
+        throw "Expected threshold comparison to exit with code 1, got $LASTEXITCODE"
+    }
+    $global:LASTEXITCODE = 0
 }
 
 Invoke-Step "CLI async target smoke test" {

@@ -9,7 +9,10 @@ from kyvoris_profiler.benchmark import (
 from kyvoris_profiler.compare import (
     MetricComparison,
     ProfileComparison,
+    ThresholdEvaluation,
+    ThresholdViolation,
     compare_profiles,
+    evaluate_thresholds,
 )
 from kyvoris_profiler.endpoint import profile_http_endpoint
 from kyvoris_profiler.metrics import (
@@ -35,9 +38,12 @@ __all__ = [
     "MetricComparison",
     "ProfileComparison",
     "ProfileSummary",
+    "ThresholdEvaluation",
+    "ThresholdViolation",
     "benchmark_async_callable",
     "benchmark_callable",
     "compare_profiles",
+    "evaluate_thresholds",
     "format_comparison_html_report",
     "format_comparison_json_report",
     "format_comparison_markdown_report",
@@ -54,4 +60,4 @@ __all__ = [
     "summarize_profile",
 ]
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"

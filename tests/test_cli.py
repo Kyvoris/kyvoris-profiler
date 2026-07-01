@@ -138,6 +138,134 @@ def test_cli_compare_reads_json_reports(tmp_path: Path) -> None:
     assert "| average_ms |" in output
 
 
+def test_cli_compare_threshold_failure_returns_nonzero(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 10.0,
+                    "min_ms": 10.0,
+                    "max_ms": 10.0,
+                    "p50_ms": 10.0,
+                    "p95_ms": 10.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    candidate_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 12.0,
+                    "min_ms": 12.0,
+                    "max_ms": 12.0,
+                    "p50_ms": 12.0,
+                    "p95_ms": 12.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(
+        [
+            "compare",
+            str(baseline_path),
+            str(candidate_path),
+            "--max-regression-percent",
+            "5",
+            "--threshold-metric",
+            "average_ms",
+            "--fail-on-regression",
+        ]
+    )
+
+    assert exit_code == 1
+
+
+def test_cli_compare_threshold_pass_returns_zero(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 100.0,
+                    "min_ms": 100.0,
+                    "max_ms": 100.0,
+                    "p50_ms": 100.0,
+                    "p95_ms": 100.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    candidate_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": 103.0,
+                    "min_ms": 103.0,
+                    "max_ms": 103.0,
+                    "p50_ms": 103.0,
+                    "p95_ms": 103.0,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(
+        [
+            "compare",
+            str(baseline_path),
+            str(candidate_path),
+            "--max-regression-percent",
+            "5",
+            "--threshold-metric",
+            "average_ms",
+            "--fail-on-regression",
+        ]
+    )
+
+    assert exit_code == 0
+
+
 def test_cli_runs_async_target(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = run(
         [

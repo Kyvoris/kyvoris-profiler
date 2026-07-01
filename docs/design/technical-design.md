@@ -53,6 +53,13 @@ Comparison is modeled as a separate result type instead of overloading
 release workflows a structured representation for deltas, percentage changes,
 and improvement/regression status.
 
+## 0.7.0 Design Decision
+
+Threshold evaluation is modeled separately from comparison generation. This lets
+users create comparison reports without enforcing a policy, or apply a CI policy
+with explicit metric filters and allowed regression percentages. CLI threshold
+checks return exit code `1` only when `--fail-on-regression` is requested.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
@@ -68,7 +75,7 @@ Create separate design documents for:
 - CLI callable argument passing and richer target configuration.
 - Async concurrency controls.
 - Richer HTTP endpoint configuration.
-- CI regression threshold policy and failure behavior.
+- Per-metric threshold configuration files.
 - Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.

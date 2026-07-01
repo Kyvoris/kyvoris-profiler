@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.6.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.7.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, and a command-line
 > interface. See
@@ -26,6 +26,7 @@ measuring that repeated behavior.
 - Profile async callables and simple HTTP endpoints.
 - Count failed measured iterations when exception capture is enabled.
 - Compare benchmark summaries across versions, branches, or implementations.
+- Enforce comparison thresholds for CI regression checks.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, or HTML reports.
 - Run benchmarks from the command line with `kyvoris-profiler`.
@@ -226,6 +227,12 @@ Compare two JSON reports from the CLI:
 python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
 ```
 
+Fail CI when selected metrics regress beyond a threshold:
+
+```powershell
+python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --threshold-metric p95_ms --fail-on-regression
+```
+
 ## API Overview
 
 ### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
@@ -281,6 +288,21 @@ Compares two `ProfileSummary` objects and returns a `ProfileComparison`:
 ```python
 comparison = compare_profiles(baseline, candidate, "main", "optimized")
 ```
+
+### `evaluate_thresholds(comparison, max_regression_percent, metrics=None)`
+
+Evaluates comparison regressions against a percentage threshold:
+
+```python
+evaluation = evaluate_thresholds(
+    comparison,
+    max_regression_percent=5.0,
+    metrics={"average_ms", "p95_ms"},
+)
+```
+
+Use this for CI gates where a pull request should fail if latency regresses more
+than an allowed percentage.
 
 The callable can wrap:
 
@@ -410,6 +432,7 @@ python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 
 python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format markdown --output reports\comparison-smoke.md
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format html --output reports\comparison-smoke.html
+python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
 ```
 
 After installing the package locally, test the console script:

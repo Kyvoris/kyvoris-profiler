@@ -13,6 +13,7 @@ from kyvoris_profiler import (
     ProfileSummary,
     benchmark_callable,
     compare_profiles,
+    evaluate_thresholds,
     format_comparison_html_report,
     format_comparison_json_report,
     format_comparison_markdown_report,
@@ -292,3 +293,44 @@ def test_comparison_report_formatters_include_key_metrics() -> None:
     assert json.loads(json_report)["comparison"]["baseline_label"] == "before"
     assert "<!doctype html>" in html_report
     assert "<th>average_ms</th>" in html_report
+
+
+def test_evaluate_thresholds_reports_regression_violations() -> None:
+    comparison = compare_profiles(
+        summarize_profile([10.0, 10.0, 10.0], failed_iterations=0),
+        summarize_profile([12.0, 12.0, 12.0], failed_iterations=1),
+    )
+
+    evaluation = evaluate_thresholds(
+        comparison,
+        max_regression_percent=5.0,
+        metrics={"average_ms", "failed_iterations"},
+    )
+
+    assert evaluation.passed is False
+    assert {violation.metric for violation in evaluation.violations} == {
+        "average_ms",
+        "failed_iterations",
+    }
+
+
+def test_evaluate_thresholds_passes_allowed_regressions() -> None:
+    comparison = compare_profiles(
+        summarize_profile([100.0, 100.0, 100.0]),
+        summarize_profile([103.0, 103.0, 103.0]),
+    )
+
+    evaluation = evaluate_thresholds(comparison, max_regression_percent=5.0)
+
+    assert evaluation.passed is True
+    assert evaluation.violations == ()
+
+
+def test_evaluate_thresholds_rejects_negative_threshold() -> None:
+    comparison = compare_profiles(
+        summarize_profile([1.0]),
+        summarize_profile([2.0]),
+    )
+
+    with pytest.raises(ValueError):
+        evaluate_thresholds(comparison, max_regression_percent=-1.0)

@@ -1,6 +1,7 @@
 # CLI
 
-Version `0.6.0` includes benchmark and comparison command-line workflows:
+Version `0.7.0` includes benchmark, comparison, and threshold command-line
+workflows:
 
 ```powershell
 kyvoris-profiler <module:function> [options]
@@ -74,6 +75,12 @@ Compare two JSON reports:
 kyvoris-profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
 ```
 
+Fail when selected metrics regress beyond 5%:
+
+```powershell
+kyvoris-profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --threshold-metric p95_ms --fail-on-regression
+```
+
 ## Compare Command
 
 ```powershell
@@ -90,6 +97,9 @@ kyvoris-profiler compare <baseline.json> <candidate.json> [options]
 | `--format html` | HTML comparison |
 | `--output PATH` | Write the comparison to a file |
 | `--title TEXT` | Set the comparison title |
+| `--max-regression-percent N` | Allowed regression percentage |
+| `--threshold-metric NAME` | Metric to evaluate; can be passed multiple times |
+| `--fail-on-regression` | Exit with code 1 when threshold violations are found |
 
 ## Current Limits
 

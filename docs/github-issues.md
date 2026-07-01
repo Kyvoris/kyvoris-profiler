@@ -18,6 +18,32 @@ implementation starts.
 - `release:0.4.0`
 - `release:0.5.0`
 - `release:0.6.0`
+- `release:0.7.0`
+
+## 0.7.0 Issues
+
+### Add Threshold Evaluation API
+
+**Problem:** CI workflows need an explicit pass/fail signal when benchmark
+metrics regress beyond an allowed tolerance.
+
+**Acceptance criteria:**
+
+- Public `evaluate_thresholds()` API exists.
+- Threshold results include pass/fail status and violations.
+- Tests cover passing, failing, and invalid threshold cases.
+
+### Add CLI Regression Gate
+
+**Problem:** Users need to fail CI from saved comparison reports without writing
+custom Python scripts.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler compare` supports `--max-regression-percent`.
+- `kyvoris-profiler compare` supports `--threshold-metric`.
+- `--fail-on-regression` exits with code 1 when violations are found.
+- Test runner covers passing and failing threshold smoke checks.
 
 ## 0.6.0 Issues
 

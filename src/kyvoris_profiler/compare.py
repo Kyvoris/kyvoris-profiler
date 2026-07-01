@@ -41,6 +41,39 @@ class ProfileComparison:
         }
 
 
+@dataclass(frozen=True)
+class ThresholdViolation:
+    """A metric that exceeded an allowed regression threshold."""
+
+    metric: str
+    baseline: float
+    candidate: float
+    delta: float
+    percent_change: float | None
+    allowed_regression_percent: float
+
+    def as_dict(self) -> dict[str, float | str | None]:
+        """Return the violation as a plain dictionary."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class ThresholdEvaluation:
+    """Threshold evaluation for a profile comparison."""
+
+    passed: bool
+    allowed_regression_percent: float
+    violations: tuple[ThresholdViolation, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the evaluation as a plain dictionary."""
+        return {
+            "passed": self.passed,
+            "allowed_regression_percent": self.allowed_regression_percent,
+            "violations": [violation.as_dict() for violation in self.violations],
+        }
+
+
 LOWER_IS_BETTER_METRICS = {
     "average_ms",
     "min_ms",
@@ -113,4 +146,42 @@ def compare_profiles(
         baseline_label=baseline_label,
         candidate_label=candidate_label,
         metrics=tuple(comparisons),
+    )
+
+
+def evaluate_thresholds(
+    comparison: ProfileComparison,
+    max_regression_percent: float,
+    metrics: set[str] | None = None,
+) -> ThresholdEvaluation:
+    """Evaluate whether comparison regressions stay within a threshold."""
+    if max_regression_percent < 0:
+        raise ValueError("max_regression_percent must be greater than or equal to 0")
+
+    violations: list[ThresholdViolation] = []
+    for metric in comparison.metrics:
+        if metrics is not None and metric.metric not in metrics:
+            continue
+        if metric.result != "regressed":
+            continue
+        if metric.percent_change is None:
+            exceeded = True
+        else:
+            exceeded = abs(metric.percent_change) > max_regression_percent
+        if exceeded:
+            violations.append(
+                ThresholdViolation(
+                    metric=metric.metric,
+                    baseline=metric.baseline,
+                    candidate=metric.candidate,
+                    delta=metric.delta,
+                    percent_change=metric.percent_change,
+                    allowed_regression_percent=max_regression_percent,
+                )
+            )
+
+    return ThresholdEvaluation(
+        passed=not violations,
+        allowed_regression_percent=max_regression_percent,
+        violations=tuple(violations),
     )

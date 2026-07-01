@@ -184,3 +184,32 @@ Closes #13
 Closes #14
 Closes #15
 ```
+
+## Example for 0.7.0
+
+```markdown
+## Summary
+
+- Added threshold evaluation for profile comparisons.
+- Added CLI regression gate flags for comparison reports.
+- Updated test runner, docs, release notes, and tests for `0.7.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added CI-friendly threshold checks for benchmark regressions.
+
+## Risk
+
+- Low. Threshold checks are opt-in and do not change existing comparison output.
+
+## Linked Issues
+
+Closes #16
+Closes #17
+```

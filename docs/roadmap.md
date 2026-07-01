@@ -16,6 +16,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Simple HTTP endpoint profiling.
 - Failed iteration counts for captured exceptions.
 - Benchmark comparison reports.
+- CI threshold evaluation for comparison reports.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -42,7 +43,6 @@ currently focused on a small, dependable core before adding heavier integrations
 - Configurable run labels and metadata.
 - Support for benchmarking callables with arguments.
 - CLI support for callable arguments and richer target configuration.
-- CI regression thresholds for comparison reports.
 
 ### 4. Inference-Oriented Metrics
 

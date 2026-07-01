@@ -149,6 +149,12 @@ The CLI can compare JSON reports:
 python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --format markdown --output reports\comparison.md
 ```
 
+Version `0.7.0` adds threshold checks for CI:
+
+```powershell
+python -m kyvoris_profiler compare reports\baseline.json reports\candidate.json --max-regression-percent 5 --threshold-metric average_ms --fail-on-regression
+```
+
 ## Reading the Output
 
 Example output:
