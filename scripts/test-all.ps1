@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.13.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.14.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {

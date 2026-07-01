@@ -177,7 +177,7 @@ Version `0.7.1` lets comparison settings come from TOML:
 python -m kyvoris_profiler compare --config kyvoris-profiler.toml
 ```
 
-Version `0.13.0` supports benchmark history for saved JSON reports with
+Version `0.14.0` supports benchmark history for saved JSON reports with
 metadata:
 
 ```powershell

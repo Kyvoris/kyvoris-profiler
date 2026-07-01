@@ -26,6 +26,32 @@ implementation starts.
 - `release:0.11.0`
 - `release:0.12.0`
 - `release:0.13.0`
+- `release:0.14.0`
+
+## 0.14.0 Issues
+
+### Add Release Check Script
+
+**Problem:** Maintainers need a repeatable local check before tagging and
+publishing releases.
+
+**Acceptance criteria:**
+
+- Script builds source and wheel artifacts.
+- Script validates artifacts with `twine check`.
+- Script installs the wheel into a clean virtual environment.
+- Script verifies package import and console script version.
+
+### Tighten Package Metadata
+
+**Problem:** Package metadata should be ready for a first stable release.
+
+**Acceptance criteria:**
+
+- Project URLs are present in `pyproject.toml`.
+- Build tools are available through the dev extra.
+- Release checklist documentation exists.
+- Package status reflects beta readiness before 1.0.0.
 
 ## 0.13.0 Issues
 

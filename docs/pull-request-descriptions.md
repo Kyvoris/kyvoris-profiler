@@ -420,3 +420,34 @@ Closes #28
 Closes #29
 Closes #30
 ```
+
+## Example for 0.14.0
+
+```markdown
+## Summary
+
+- Added release-readiness checks for package artifacts.
+- Added release checklist documentation.
+- Updated package metadata and release notes for `0.14.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1`
+
+## Release Notes
+
+- Added package build, artifact validation, and clean-install checks.
+
+## Risk
+
+- Low. This release adds validation tooling and metadata without changing core
+  profiler behavior.
+
+## Linked Issues
+
+Closes #31
+Closes #32
+```

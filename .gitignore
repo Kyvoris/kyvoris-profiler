@@ -17,6 +17,7 @@ venv/
 build/
 dist/
 *.egg-info/
+.release-check/
 
 # OS
 .DS_Store

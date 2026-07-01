@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.14.0
+
+`0.14.0` adds packaging and release-readiness checks before the 1.0.0 push.
+
+### Added
+
+- `scripts/release-check.ps1` for building, validating, and clean-installing
+  package artifacts.
+- `docs/release-checklist.md`.
+- Project URLs in package metadata.
+- Build and twine tools in the `dev` optional dependency group.
+
+### Changed
+
+- Project metadata version is now `0.14.0`.
+- Development status classifier is now beta.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1`
+
 ## 0.13.0
 
 `0.13.0` adds saved history comparison presets.

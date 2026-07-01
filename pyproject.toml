@@ -1,22 +1,23 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "kyvoris-profiler"
-version = "0.13.0"
+version = "0.14.0"
 description = "Lightweight profiling utilities for AI inference workloads."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Kyvoris" }
 ]
 keywords = ["benchmarking", "profiling", "ai", "inference", "latency"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -27,12 +28,19 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/Kyvoris/kyvoris-profiler"
+Repository = "https://github.com/Kyvoris/kyvoris-profiler"
+Issues = "https://github.com/Kyvoris/kyvoris-profiler/issues"
+
 [project.scripts]
 kyvoris-profiler = "kyvoris_profiler.cli:main"
 
 [project.optional-dependencies]
 dev = [
+    "build>=1",
     "pytest>=8",
+    "twine>=5",
 ]
 
 [tool.setuptools.packages.find]

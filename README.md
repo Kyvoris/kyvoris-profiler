@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.13.0` focuses on latency measurement,
+> Project status: beta. Version `0.14.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, benchmark history, and a
 > command-line interface. See
@@ -419,6 +419,7 @@ kyvoris-profiler/
 |   |-- github-issues.md
 |   |-- metrics.md
 |   |-- pull-request-descriptions.md
+|   |-- release-checklist.md
 |   |-- report-schema.md
 |   |-- weekly-milestones.md
 |   `-- roadmap.md
@@ -471,6 +472,12 @@ If PowerShell blocks local scripts on your machine, use a one-time bypass:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1
+```
+
+Run release-readiness checks:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\release-check.ps1
 ```
 
 The test runner includes CLI coverage, but you can also run the CLI checks

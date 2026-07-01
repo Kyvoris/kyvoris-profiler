@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,17 @@ from kyvoris_profiler.cli import (
     parse_metadata_args,
     run,
 )
+
+
+def test_package_metadata_version_matches_public_version() -> None:
+    import kyvoris_profiler
+
+    pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    metadata = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+
+    assert metadata["project"]["version"] == kyvoris_profiler.__version__
+    assert metadata["project"]["urls"]["Repository"].endswith("kyvoris-profiler")
+    assert "build>=1" in metadata["project"]["optional-dependencies"]["dev"]
 
 
 def test_hugging_face_demo_uses_three_default_models() -> None:

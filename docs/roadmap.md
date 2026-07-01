@@ -24,6 +24,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Targeted history comparison by index or label.
 - History filtering by label, metadata, and latest count.
 - Saved history comparison presets.
+- Release-readiness checks for package artifacts.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -33,13 +34,12 @@ currently focused on a small, dependable core before adding heavier integrations
 
 ## Near-Term Milestones
 
-### 1. Release Operations
+### 1. 1.0.0 Release Operations
 
-- Weekly milestones.
-- GitHub issue templates.
-- Pull request descriptions.
-- Release notes.
-- Technical design documents for major changes.
+- Fresh-environment install verification.
+- GitHub Actions CI.
+- Final README quickstart polish.
+- Tagging and release checklist execution.
 
 ### 2. Structured Output
 

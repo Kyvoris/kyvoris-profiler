@@ -96,6 +96,13 @@ release note draft.
 - Keep CLI flags as overrides for preset values.
 - Add preset smoke checks and documentation.
 
+## Week 14: 0.14.0 Release Readiness
+
+- Add package build and artifact validation checks.
+- Validate clean wheel installation.
+- Tighten package metadata.
+- Add release checklist documentation.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

@@ -105,6 +105,14 @@ file. This avoids adding another configuration file and keeps CI commands short.
 CLI flags continue to override preset values so users can reuse a preset while
 changing output format or destination for one run.
 
+## 0.14.0 Design Decision
+
+Release readiness is handled with a local PowerShell script instead of adding a
+remote publishing workflow yet. The script builds artifacts, validates metadata,
+installs the wheel into a clean virtual environment, and checks the installed
+console script. This keeps 1.0.0 preparation concrete while avoiding premature
+publishing automation.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
