@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.8.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.9.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -153,6 +153,26 @@ Invoke-Step "CLI comparison CSV output validation" {
     Assert-FileContains "reports\comparison-smoke.csv" "average_ms"
 }
 
+Invoke-Step "CLI history append smoke test" {
+    Remove-Item -LiteralPath reports\history-smoke.jsonl -ErrorAction SilentlyContinue
+    python -m kyvoris_profiler history append reports\baseline-smoke.json --history reports\history-smoke.jsonl --label baseline
+    python -m kyvoris_profiler history append reports\candidate-smoke.json --history reports\history-smoke.jsonl --label candidate
+}
+
+Invoke-Step "CLI history comparison smoke test" {
+    python -m kyvoris_profiler history compare-latest --history reports\history-smoke.jsonl --format markdown --output reports\history-comparison-smoke.md
+}
+
+Invoke-Step "CLI history output validation" {
+    Assert-PathExists "reports\history-smoke.jsonl"
+    Assert-FileContains "reports\history-comparison-smoke.md" "Benchmark History Comparison"
+    Assert-FileContains "reports\history-comparison-smoke.md" "average_ms"
+}
+
+Invoke-Step "CLI history threshold pass smoke test" {
+    python -m kyvoris_profiler history compare-latest --history reports\history-smoke.jsonl --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
+}
+
 Invoke-Step "CLI threshold pass smoke test" {
     python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
 }
@@ -225,11 +245,13 @@ if ($InstallHuggingFace) {
 
 if ($IncludeHuggingFace) {
     Invoke-Step "Hugging Face model example" {
-        python examples\run_model_demo.py | Tee-Object -FilePath reports\huggingface-smoke.txt
+        python examples\run_model_demo.py --iterations 3 --warmup 1 | Tee-Object -FilePath reports\huggingface-smoke.txt
     }
 
     Invoke-Step "Hugging Face output validation" {
-        Assert-FileContains "reports\huggingface-smoke.txt" "Model: distilbert-base-uncased-finetuned-sst-2-english"
+        Assert-FileContains "reports\huggingface-smoke.txt" "Model: distilbert/distilbert-base-uncased-finetuned-sst-2-english"
+        Assert-FileContains "reports\huggingface-smoke.txt" "Model: cardiffnlp/twitter-roberta-base-sentiment-latest"
+        Assert-FileContains "reports\huggingface-smoke.txt" "Model: lxyuan/distilbert-base-multilingual-cased-sentiments-student"
         Assert-FileContains "reports\huggingface-smoke.txt" "Sample output:"
     }
 }

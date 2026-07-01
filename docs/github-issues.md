@@ -21,6 +21,32 @@ implementation starts.
 - `release:0.7.0`
 - `release:0.7.1`
 - `release:0.8.0`
+- `release:0.9.0`
+
+## 0.9.0 Issues
+
+### Add Benchmark History Storage
+
+**Problem:** Users need a simple way to keep repeated benchmark summaries
+without building custom storage.
+
+**Acceptance criteria:**
+
+- Public history helpers can append and read JSONL records.
+- History records include timestamp, label, optional source path, and summary
+  metrics.
+- Tests cover appending from a summary JSON report.
+
+### Add CLI History Comparison
+
+**Problem:** Users need to compare the latest saved benchmark runs from the CLI.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler history append` appends a summary JSON report to JSONL.
+- `kyvoris-profiler history compare-latest` compares the latest two records.
+- History comparison supports report formats and threshold flags.
+- Test runner includes history smoke checks.
 
 ## 0.8.0 Issues
 

@@ -11,6 +11,39 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kyvoris_profiler.cli import load_callable, run
 
 
+def test_hugging_face_demo_uses_three_default_models() -> None:
+    from examples.run_model_demo import MODEL_NAMES
+
+    assert len(MODEL_NAMES) == 3
+    assert len(set(MODEL_NAMES)) == 3
+    assert "cardiffnlp/twitter-roberta-base-sentiment-latest" in MODEL_NAMES
+
+
+def write_json_report(path: Path, average_ms: float) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": {
+                    "average_ms": average_ms,
+                    "min_ms": average_ms,
+                    "max_ms": average_ms,
+                    "p50_ms": average_ms,
+                    "p95_ms": average_ms,
+                    "iterations": 1,
+                    "warmup_iterations": 0,
+                    "failed_iterations": 0,
+                    "average_cpu_ms": None,
+                    "min_cpu_ms": None,
+                    "max_cpu_ms": None,
+                    "peak_memory_kb": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_load_callable_imports_target() -> None:
     callable_obj = load_callable("tests.fixtures.cli_targets:target")
 
@@ -465,6 +498,118 @@ def test_cli_compare_command_line_overrides_toml_config(tmp_path: Path) -> None:
     assert json.loads(override_output_path.read_text(encoding="utf-8"))[
         "schema_version"
     ] == "1.0"
+
+
+def test_cli_history_appends_and_compares_latest_records(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    history_path = tmp_path / "history.jsonl"
+    output_path = tmp_path / "history-comparison.md"
+    write_json_report(baseline_path, 10.0)
+    write_json_report(candidate_path, 9.0)
+
+    assert (
+        run(
+            [
+                "history",
+                "append",
+                str(baseline_path),
+                "--history",
+                str(history_path),
+                "--label",
+                "before",
+            ]
+        )
+        == 0
+    )
+    assert (
+        run(
+            [
+                "history",
+                "append",
+                str(candidate_path),
+                "--history",
+                str(history_path),
+                "--label",
+                "after",
+            ]
+        )
+        == 0
+    )
+
+    exit_code = run(
+        [
+            "history",
+            "compare-latest",
+            "--history",
+            str(history_path),
+            "--format",
+            "markdown",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "Benchmark History Comparison" in output
+    assert "Baseline: `before`" in output
+    assert "Candidate: `after`" in output
+    assert "| average_ms |" in output
+
+
+def test_cli_history_threshold_failure_returns_nonzero(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    history_path = tmp_path / "history.jsonl"
+    write_json_report(baseline_path, 10.0)
+    write_json_report(candidate_path, 12.0)
+
+    assert (
+        run(
+            [
+                "history",
+                "append",
+                str(baseline_path),
+                "--history",
+                str(history_path),
+                "--label",
+                "baseline",
+            ]
+        )
+        == 0
+    )
+    assert (
+        run(
+            [
+                "history",
+                "append",
+                str(candidate_path),
+                "--history",
+                str(history_path),
+                "--label",
+                "candidate",
+            ]
+        )
+        == 0
+    )
+
+    exit_code = run(
+        [
+            "history",
+            "compare-latest",
+            "--history",
+            str(history_path),
+            "--max-regression-percent",
+            "5",
+            "--threshold-metric",
+            "average_ms",
+            "--fail-on-regression",
+        ]
+    )
+
+    assert exit_code == 1
 
 
 def test_cli_runs_async_target(capsys: pytest.CaptureFixture[str]) -> None:

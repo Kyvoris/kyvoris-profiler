@@ -11,6 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from kyvoris_profiler import (
     LatencySummary,
     ProfileSummary,
+    append_history_from_report,
+    append_history_record,
     benchmark_callable,
     compare_profiles,
     evaluate_thresholds,
@@ -28,6 +30,7 @@ from kyvoris_profiler import (
     profile_async_callable,
     profile_callable,
     profile_http_endpoint,
+    read_history,
     summarize_latencies,
     summarize_profile,
 )
@@ -342,3 +345,42 @@ def test_evaluate_thresholds_rejects_negative_threshold() -> None:
 
     with pytest.raises(ValueError):
         evaluate_thresholds(comparison, max_regression_percent=-1.0)
+
+
+def test_history_records_can_be_appended_and_read(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    baseline = summarize_profile([10.0, 11.0, 12.0])
+    candidate = summarize_profile([9.0, 10.0, 11.0])
+
+    append_history_record(history_path, baseline, label="baseline")
+    append_history_record(history_path, candidate, label="candidate")
+
+    records = read_history(history_path)
+
+    assert [record.label for record in records] == ["baseline", "candidate"]
+    assert records[0].summary.average_ms == 11.0
+    assert records[1].summary.average_ms == 10.0
+
+
+def test_history_can_append_from_json_report(tmp_path: Path) -> None:
+    report_path = tmp_path / "report.json"
+    history_path = tmp_path / "history.jsonl"
+    report_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "metrics": summarize_profile([1.0, 2.0, 3.0]).as_dict(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    record = append_history_from_report(
+        history_path,
+        report_path,
+        label="main",
+    )
+
+    assert record.label == "main"
+    assert record.source == str(report_path)
+    assert read_history(history_path)[0].summary.average_ms == 2.0

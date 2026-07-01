@@ -7,10 +7,10 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.8.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.9.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
-> async workloads, HTTP endpoints, comparison reports, and a command-line
-> interface. See
+> async workloads, HTTP endpoints, comparison reports, benchmark history, and a
+> command-line interface. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -26,6 +26,7 @@ measuring that repeated behavior.
 - Profile async callables and simple HTTP endpoints.
 - Count failed measured iterations when exception capture is enabled.
 - Compare benchmark summaries across versions, branches, or implementations.
+- Save benchmark history as JSONL and compare the latest two saved runs.
 - Enforce comparison thresholds for CI regression checks.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, HTML, or CSV reports.
@@ -103,10 +104,12 @@ Peak Python Memory: 4.250 KB
 ## Real Model Example
 
 Kyvoris Profiler includes an optional Hugging Face example that benchmarks real
-sentiment-analysis inference with:
+sentiment-analysis inference across three curated Hugging Face models:
 
 ```text
-distilbert-base-uncased-finetuned-sst-2-english
+distilbert/distilbert-base-uncased-finetuned-sst-2-english
+cardiffnlp/twitter-roberta-base-sentiment-latest
+lxyuan/distilbert-base-multilingual-cased-sentiments-student
 ```
 
 Install the optional model dependencies:
@@ -120,6 +123,20 @@ Run the example:
 ```powershell
 $env:PYTHONPATH="src"
 python examples\run_model_demo.py
+```
+
+Run a smaller smoke test:
+
+```powershell
+$env:PYTHONPATH="src"
+python examples\run_model_demo.py --iterations 3 --warmup 1
+```
+
+Override the model list if you want to benchmark specific Hugging Face models:
+
+```powershell
+$env:PYTHONPATH="src"
+python examples\run_model_demo.py --model cardiffnlp/twitter-roberta-base-sentiment-latest --iterations 3
 ```
 
 Expected output shape:
@@ -140,7 +157,7 @@ Minimum CPU: 22.904 ms
 Maximum CPU: 35.001 ms
 Peak Python Memory: 85.250 KB
 
-Model: distilbert-base-uncased-finetuned-sst-2-english
+Model: distilbert/distilbert-base-uncased-finetuned-sst-2-english
 Input: Kyvoris Profiler makes inference benchmarking simple.
 Sample output: [{'label': 'POSITIVE', 'score': 0.999...}]
 ```
@@ -240,6 +257,23 @@ python -m kyvoris_profiler compare --config kyvoris-profiler.toml
 ```
 
 Command-line arguments override values from the config file.
+
+## Benchmark History Example
+
+Version `0.9.0` adds a lightweight JSONL history workflow for saved JSON
+summary reports:
+
+```powershell
+python -m kyvoris_profiler history append reports\baseline.json --history reports\history.jsonl --label baseline
+python -m kyvoris_profiler history append reports\candidate.json --history reports\history.jsonl --label candidate
+python -m kyvoris_profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
+```
+
+History comparison supports the same threshold flags as direct comparison:
+
+```powershell
+python -m kyvoris_profiler history compare-latest --history reports\history.jsonl --max-regression-percent 5 --threshold-metric average_ms --fail-on-regression
+```
 
 ## API Overview
 
@@ -366,7 +400,7 @@ print(format_csv_report(summary))
 is useful for README snippets, CI comments, and benchmark artifacts.
 `format_json_report()` is useful for automation and storage. `format_html_report()`
 is useful for standalone benchmark artifacts. `format_csv_report()` is useful
-for spreadsheets and simple benchmark history.
+for spreadsheets and table-based analysis.
 
 For machine-readable formats, see [docs/report-schema.md](docs/report-schema.md).
 
@@ -397,6 +431,7 @@ kyvoris-profiler/
 |       |-- cli.py
 |       |-- compare.py
 |       |-- endpoint.py
+|       |-- history.py
 |       |-- metrics.py
 |       |-- report.py
 |       `-- __init__.py
@@ -450,6 +485,9 @@ python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --format csv --output reports\comparison-smoke.csv
 python -m kyvoris_profiler compare reports\baseline-smoke.json reports\candidate-smoke.json --max-regression-percent 100 --threshold-metric average_ms --fail-on-regression
 python -m kyvoris_profiler compare --config kyvoris-profiler.toml --format markdown --output reports\config-comparison-smoke.md --max-regression-percent 100 --threshold-metric average_ms
+python -m kyvoris_profiler history append reports\baseline-smoke.json --history reports\history-smoke.jsonl --label baseline
+python -m kyvoris_profiler history append reports\candidate-smoke.json --history reports\history-smoke.jsonl --label candidate
+python -m kyvoris_profiler history compare-latest --history reports\history-smoke.jsonl --format markdown --output reports\history-comparison-smoke.md
 ```
 
 After installing the package locally, test the console script:
@@ -493,6 +531,7 @@ Planned areas include:
 
 - CSV exports
 - benchmark labels and metadata
+- benchmark history workflows
 - support for callables with arguments
 - inference-specific metrics such as tokens per second and time to first token
 - native process, GPU, and framework-specific memory adapters

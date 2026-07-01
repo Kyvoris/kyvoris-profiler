@@ -69,6 +69,14 @@ CSV is added as a spreadsheet-oriented presentation format while JSON remains
 the canonical machine-readable format. CSV output is intentionally simple and
 uses the standard library so report generation remains dependency-free.
 
+## 0.9.0 Design Decision
+
+Benchmark history is stored as JSON Lines so each run can be appended without
+rewriting the whole file. A history record stores timestamp, label, optional
+source path, and normalized `ProfileSummary` metrics. The first history command
+compares only the latest two records, keeping the workflow small while reusing
+the existing comparison report and threshold logic.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

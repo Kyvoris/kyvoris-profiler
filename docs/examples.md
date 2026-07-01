@@ -36,10 +36,20 @@ $env:PYTHONPATH="src"
 python examples\run_model_demo.py
 ```
 
-The script uses the Hugging Face `pipeline` API with:
+The script uses the Hugging Face `pipeline` API with three curated sentiment
+models:
 
 ```text
-distilbert-base-uncased-finetuned-sst-2-english
+distilbert/distilbert-base-uncased-finetuned-sst-2-english
+cardiffnlp/twitter-roberta-base-sentiment-latest
+lxyuan/distilbert-base-multilingual-cased-sentiments-student
+```
+
+Use `--model` to benchmark a specific model instead of the default list:
+
+```powershell
+$env:PYTHONPATH="src"
+python examples\run_model_demo.py --model cardiffnlp/twitter-roberta-base-sentiment-latest --iterations 3
 ```
 
 It benchmarks sentiment analysis for this input:
@@ -167,6 +177,14 @@ Version `0.7.1` lets comparison settings come from TOML:
 python -m kyvoris_profiler compare --config kyvoris-profiler.toml
 ```
 
+Version `0.9.0` adds benchmark history for saved JSON reports:
+
+```powershell
+python -m kyvoris_profiler history append reports\baseline.json --history reports\history.jsonl --label baseline
+python -m kyvoris_profiler history append reports\candidate.json --history reports\history.jsonl --label candidate
+python -m kyvoris_profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
+```
+
 ## Reading the Output
 
 Example output:
@@ -187,7 +205,7 @@ Minimum CPU: 22.904 ms
 Maximum CPU: 35.001 ms
 Peak Python Memory: 85.250 KB
 
-Model: distilbert-base-uncased-finetuned-sst-2-english
+Model: distilbert/distilbert-base-uncased-finetuned-sst-2-english
 Input: Kyvoris Profiler makes inference benchmarking simple.
 Sample output: [{'label': 'POSITIVE', 'score': 0.999...}]
 ```

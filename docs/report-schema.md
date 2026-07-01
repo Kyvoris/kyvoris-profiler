@@ -2,7 +2,7 @@
 
 Kyvoris Profiler supports human-readable and machine-readable report formats.
 JSON is the canonical machine-readable format. CSV is intended for spreadsheets,
-quick analysis, and simple benchmark history files.
+quick analysis, and table-based exports. JSONL is used for benchmark history.
 
 ## Summary JSON
 
@@ -112,3 +112,39 @@ average_ms,10.000,12.000,+2.000,+20.00%,regressed
 
 Use comparison CSV when you want to inspect deltas in Excel or another
 spreadsheet tool.
+
+## History JSONL
+
+History JSONL is produced by appending summary JSON reports:
+
+```powershell
+python -m kyvoris_profiler history append reports/summary.json --history reports/history.jsonl --label main
+```
+
+Each line is a standalone JSON object:
+
+```json
+{
+  "label": "main",
+  "source": "reports/summary.json",
+  "summary": {
+    "average_ms": 5.1,
+    "min_ms": 5.0,
+    "max_ms": 5.4,
+    "p50_ms": 5.1,
+    "p95_ms": 5.3,
+    "iterations": 10,
+    "warmup_iterations": 1,
+    "failed_iterations": 0,
+    "average_cpu_ms": null,
+    "min_cpu_ms": null,
+    "max_cpu_ms": null,
+    "peak_memory_kb": null
+  },
+  "timestamp": "2026-07-01T12:00:00+00:00"
+}
+```
+
+History records intentionally store the normalized `ProfileSummary` metrics, not
+the original report title. Use `label` to identify the branch, model, version,
+or run being compared.

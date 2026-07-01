@@ -19,6 +19,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Benchmark comparison reports.
 - CI threshold evaluation for comparison reports.
 - TOML configuration for repeatable comparison threshold settings.
+- JSONL benchmark history for saved summary reports.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -38,8 +39,8 @@ currently focused on a small, dependable core before adding heavier integrations
 
 ### 2. Structured Output
 
-- Optional CSV export for repeated benchmark runs.
 - Stable schema documentation for downstream tooling.
+- Richer metadata for repeated benchmark runs.
 
 ### 3. Benchmark Controls
 
@@ -65,7 +66,6 @@ currently focused on a small, dependable core before adding heavier integrations
 - Adapters for local inference engines.
 - Adapters for remote HTTP inference endpoints.
 - Memory and device utilization snapshots.
-- CI-friendly regression thresholds.
 - Lightweight dashboard output for benchmark history.
 
 ## Guiding Principles

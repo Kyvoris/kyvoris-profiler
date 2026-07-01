@@ -15,6 +15,14 @@ from kyvoris_profiler.compare import (
     evaluate_thresholds,
 )
 from kyvoris_profiler.endpoint import profile_http_endpoint
+from kyvoris_profiler.history import (
+    HistoryRecord,
+    append_history_from_report,
+    append_history_record,
+    latest_pair,
+    read_history,
+    read_summary_report,
+)
 from kyvoris_profiler.metrics import (
     LatencySummary,
     ProfileSummary,
@@ -40,6 +48,7 @@ __all__ = [
     "MetricComparison",
     "ProfileComparison",
     "ProfileSummary",
+    "HistoryRecord",
     "ThresholdEvaluation",
     "ThresholdViolation",
     "benchmark_async_callable",
@@ -56,12 +65,17 @@ __all__ = [
     "format_json_report",
     "format_markdown_report",
     "format_text_report",
+    "append_history_from_report",
+    "append_history_record",
+    "latest_pair",
     "percentile",
     "profile_async_callable",
     "profile_callable",
     "profile_http_endpoint",
+    "read_history",
+    "read_summary_report",
     "summarize_latencies",
     "summarize_profile",
 ]
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"

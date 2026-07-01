@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.9.0
+
+`0.9.0` adds benchmark history storage and latest-run comparison workflows.
+
+### Added
+
+- Public benchmark history helpers for JSONL storage.
+- `kyvoris-profiler history append` for saving summary JSON reports.
+- `kyvoris-profiler history compare-latest` for comparing the latest two saved
+  records.
+- Threshold checks for history comparisons.
+- History smoke checks in `scripts/test-all.ps1`.
+- Documentation for history CLI usage and JSONL schema.
+- Hugging Face model example now benchmarks three curated sentiment models by
+  default.
+
+### Changed
+
+- Project metadata version is now `0.9.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.8.0
 
 `0.8.0` adds CSV reports and schema documentation for report consumers.

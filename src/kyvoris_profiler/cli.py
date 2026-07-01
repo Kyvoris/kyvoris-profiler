@@ -15,9 +15,12 @@ from pathlib import Path
 from typing import Any
 
 from kyvoris_profiler import (
+    ThresholdEvaluation,
     __version__,
+    append_history_from_report,
     compare_profiles,
     evaluate_thresholds,
+    latest_pair,
     profile_async_callable,
     profile_callable,
 )
@@ -128,6 +131,76 @@ def build_compare_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def build_history_parser() -> argparse.ArgumentParser:
+    """Build the benchmark history CLI argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="kyvoris-profiler history",
+        description="Save and compare benchmark history records.",
+    )
+    subparsers = parser.add_subparsers(dest="history_command", required=True)
+
+    append_parser = subparsers.add_parser(
+        "append",
+        help="Append a JSON benchmark report to a JSONL history file.",
+    )
+    append_parser.add_argument("report", type=Path, help="JSON benchmark report.")
+    append_parser.add_argument(
+        "--history",
+        type=Path,
+        default=Path("reports/history.jsonl"),
+        help="History JSONL path. Default: reports/history.jsonl.",
+    )
+    append_parser.add_argument(
+        "--label",
+        required=True,
+        help="Label for the saved history record.",
+    )
+
+    compare_parser = subparsers.add_parser(
+        "compare-latest",
+        help="Compare the latest two records in a history file.",
+    )
+    compare_parser.add_argument(
+        "--history",
+        type=Path,
+        default=Path("reports/history.jsonl"),
+        help="History JSONL path. Default: reports/history.jsonl.",
+    )
+    compare_parser.add_argument(
+        "--format",
+        choices=sorted(COMPARISON_FORMATTERS),
+        default="text",
+        help="Comparison report format. Default: text.",
+    )
+    compare_parser.add_argument(
+        "--output",
+        type=Path,
+        help="Write comparison report to this path instead of stdout.",
+    )
+    compare_parser.add_argument(
+        "--title",
+        default="Benchmark History Comparison",
+        help="Comparison report title. Default: Benchmark History Comparison.",
+    )
+    compare_parser.add_argument(
+        "--max-regression-percent",
+        type=float,
+        help="Allowed regression percentage before threshold violation.",
+    )
+    compare_parser.add_argument(
+        "--threshold-metric",
+        action="append",
+        dest="threshold_metrics",
+        help="Metric to evaluate against the threshold. Can be passed multiple times.",
+    )
+    compare_parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help="Exit with code 1 when threshold violations are found.",
+    )
+    return parser
+
+
 def add_run_arguments(parser: argparse.ArgumentParser) -> None:
     """Add benchmark execution arguments to a parser."""
     parser.add_argument(
@@ -180,6 +253,10 @@ def run(argv: Sequence[str] | None = None) -> int:
         parser = build_compare_parser()
         args = parser.parse_args(argv[1:])
         return run_compare(args, parser)
+    if argv and argv[0] == "history":
+        parser = build_history_parser()
+        args = parser.parse_args(argv[1:])
+        return run_history(args, parser)
 
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -293,24 +370,95 @@ def run_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
         print(report)
 
     if threshold_evaluation is not None:
-        if threshold_evaluation.passed:
-            print("Threshold check: passed", file=sys.stderr)
-        else:
-            print("Threshold check: failed", file=sys.stderr)
-            for violation in threshold_evaluation.violations:
-                change = (
-                    "n/a"
-                    if violation.percent_change is None
-                    else f"{violation.percent_change:+.2f}%"
-                )
-                print(
-                    f"- {violation.metric}: {change} "
-                    f"(allowed {violation.allowed_regression_percent:.2f}%)",
-                    file=sys.stderr,
-                )
-            if fail_on_regression:
-                return 1
+        threshold_exit_code = print_threshold_evaluation(
+            threshold_evaluation,
+            fail_on_regression=fail_on_regression,
+        )
+        if threshold_exit_code != 0:
+            return threshold_exit_code
 
+    return 0
+
+
+def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    """Run a benchmark history command."""
+    try:
+        if args.history_command == "append":
+            record = append_history_from_report(
+                args.history,
+                args.report,
+                label=args.label,
+            )
+            print(
+                f"Appended history record: {record.label} "
+                f"({record.timestamp}) -> {args.history}"
+            )
+            return 0
+
+        if args.history_command == "compare-latest":
+            baseline_record, candidate_record = latest_pair(args.history)
+            comparison = compare_profiles(
+                baseline_record.summary,
+                candidate_record.summary,
+                baseline_label=baseline_record.label,
+                candidate_label=candidate_record.label,
+            )
+            threshold_evaluation = None
+            if args.max_regression_percent is not None:
+                threshold_evaluation = evaluate_thresholds(
+                    comparison,
+                    max_regression_percent=args.max_regression_percent,
+                    metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
+                )
+        else:
+            raise ValueError(f"unsupported history command: {args.history_command}")
+    except Exception as exc:
+        parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
+
+    formatter = COMPARISON_FORMATTERS[args.format]
+    report = formatter(comparison, title=args.title)
+
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(report + "\n", encoding="utf-8")
+    else:
+        print(report)
+
+    if threshold_evaluation is not None:
+        threshold_exit_code = print_threshold_evaluation(
+            threshold_evaluation,
+            fail_on_regression=args.fail_on_regression,
+        )
+        if threshold_exit_code != 0:
+            return threshold_exit_code
+
+    return 0
+
+
+def print_threshold_evaluation(
+    threshold_evaluation: ThresholdEvaluation,
+    *,
+    fail_on_regression: bool,
+) -> int:
+    """Print threshold evaluation details and return the appropriate exit code."""
+    if threshold_evaluation.passed:
+        print("Threshold check: passed", file=sys.stderr)
+        return 0
+
+    print("Threshold check: failed", file=sys.stderr)
+    for violation in threshold_evaluation.violations:
+        change = (
+            "n/a"
+            if violation.percent_change is None
+            else f"{violation.percent_change:+.2f}%"
+        )
+        print(
+            f"- {violation.metric}: {change} "
+            f"(allowed {violation.allowed_regression_percent:.2f}%)",
+            file=sys.stderr,
+        )
+    if fail_on_regression:
+        return 1
     return 0
 
 

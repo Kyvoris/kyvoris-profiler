@@ -40,6 +40,34 @@ release note draft.
 - Add Markdown and HTML comparison output.
 - Document branch-to-branch and model-to-model workflows.
 
+## Week 6: 0.7.0 Regression Gates
+
+- Add threshold evaluation for comparison results.
+- Add CLI flags for allowed regression percentage and selected metrics.
+- Return a non-zero exit code when `--fail-on-regression` is requested.
+- Add passing and failing smoke tests.
+
+## Week 7: 0.7.1 Configuration
+
+- Add TOML configuration for repeatable comparison commands.
+- Keep CLI flags as overrides for configured values.
+- Add config smoke tests and documentation.
+- Document why TOML is the preferred local configuration format.
+
+## Week 8: 0.8.0 Report Formats
+
+- Add CSV reports for summary and comparison output.
+- Document JSON and CSV report schemas.
+- Add CSV CLI and formatter tests.
+- Update release notes and PR descriptions.
+
+## Week 9: 0.9.0 Benchmark History
+
+- Add JSONL history records for saved benchmark summaries.
+- Add CLI commands for appending reports and comparing latest records.
+- Reuse comparison report formats and threshold checks for history.
+- Add test runner coverage and schema documentation.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

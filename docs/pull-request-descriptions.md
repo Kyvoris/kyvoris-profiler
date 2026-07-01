@@ -271,3 +271,34 @@ Closes #18
 Closes #19
 Closes #20
 ```
+
+## Example for 0.9.0
+
+```markdown
+## Summary
+
+- Added JSONL benchmark history helpers.
+- Added `kyvoris-profiler history append` and `history compare-latest`.
+- Updated CLI tests, test runner smoke checks, docs, and release notes for
+  `0.9.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added benchmark history storage and latest-run comparison workflows.
+
+## Risk
+
+- Low. History is additive and reuses existing summary, comparison, and
+  threshold data structures.
+
+## Linked Issues
+
+Closes #21
+Closes #22
+```

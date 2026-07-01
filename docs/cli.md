@@ -1,7 +1,7 @@
 # CLI
 
-Version `0.7.1` includes benchmark, comparison, threshold, and TOML config
-workflows:
+Version `0.9.0` includes benchmark, comparison, threshold, TOML config, and
+history workflows:
 
 ```powershell
 kyvoris-profiler <module:function> [options]
@@ -94,6 +94,14 @@ CLI arguments override config values:
 kyvoris-profiler compare --config kyvoris-profiler.toml --format html --output reports\comparison.html
 ```
 
+Append saved JSON reports to a history file and compare the latest two entries:
+
+```powershell
+kyvoris-profiler history append reports\baseline.json --history reports\history.jsonl --label baseline
+kyvoris-profiler history append reports\candidate.json --history reports\history.jsonl --label candidate
+kyvoris-profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
+```
+
 ## Compare Command
 
 ```powershell
@@ -105,6 +113,35 @@ kyvoris-profiler compare <baseline.json> <candidate.json> [options]
 | `--baseline-label TEXT` | Label for the baseline report |
 | `--candidate-label TEXT` | Label for the candidate report |
 | `--config PATH` | TOML comparison config file |
+| `--format text` | Plain text comparison |
+| `--format markdown` | Markdown comparison |
+| `--format json` | JSON comparison |
+| `--format html` | HTML comparison |
+| `--format csv` | CSV comparison |
+| `--output PATH` | Write the comparison to a file |
+| `--title TEXT` | Set the comparison title |
+| `--max-regression-percent N` | Allowed regression percentage |
+| `--threshold-metric NAME` | Metric to evaluate; can be passed multiple times |
+| `--fail-on-regression` | Exit with code 1 when threshold violations are found |
+
+## History Command
+
+Append a summary JSON report:
+
+```powershell
+kyvoris-profiler history append <report.json> --history <history.jsonl> --label <label>
+```
+
+Compare the latest two history records:
+
+```powershell
+kyvoris-profiler history compare-latest --history <history.jsonl> [options]
+```
+
+| Option | Meaning |
+| --- | --- |
+| `--history PATH` | History JSONL file. Default: `reports/history.jsonl` |
+| `--label TEXT` | Label used when appending a record |
 | `--format text` | Plain text comparison |
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |
