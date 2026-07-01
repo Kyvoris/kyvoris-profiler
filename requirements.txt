@@ -1,0 +1,4 @@
+# Kyvoris Profiler currently has no runtime dependencies.
+#
+# For development, install the package with:
+#   python -m pip install -e ".[dev]"
