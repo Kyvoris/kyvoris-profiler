@@ -62,9 +62,16 @@ HTML artifact with resource metrics:
 kyvoris-profiler examples.run_demo:simulated_inference --format html --output reports/demo.html --collect-cpu --collect-memory
 ```
 
+Async callable target:
+
+```powershell
+kyvoris-profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
+```
+
 ## Current Limits
 
 - The callable must take no arguments.
+- Async callable targets are detected automatically.
 - Memory metrics are Python-traced allocations from `tracemalloc`, not GPU
   memory or full native framework memory.
 - CPU metrics are process CPU time, not system-wide utilization.

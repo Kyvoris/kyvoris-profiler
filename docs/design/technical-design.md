@@ -38,6 +38,14 @@ no-argument callables. This keeps the first command-line release predictable and
 aligned with the current Python API. Output formatting reuses the existing
 report module, so CLI behavior stays consistent with library behavior.
 
+## 0.5.0 Design Decision
+
+Async profiling mirrors sync profiling instead of creating a separate result
+shape. This keeps report formatting and downstream tooling stable. Endpoint
+profiling is intentionally implemented as a small standard-library wrapper
+around `profile_callable()`; richer clients should be represented as user-owned
+callables so the core stays provider-neutral.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
@@ -51,6 +59,8 @@ report module, so CLI behavior stays consistent with library behavior.
 Create separate design documents for:
 
 - CLI callable argument passing and richer target configuration.
+- Async concurrency controls.
+- Richer HTTP endpoint configuration.
 - Native process, framework, and GPU memory adapters.
 - Async benchmarking.
 - Benchmark comparison schemas.

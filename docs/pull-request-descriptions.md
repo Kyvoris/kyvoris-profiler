@@ -121,3 +121,35 @@ Closes #7
 Closes #8
 Closes #9
 ```
+
+## Example for 0.5.0
+
+```markdown
+## Summary
+
+- Added async callable profiling APIs.
+- Added lightweight HTTP endpoint profiling.
+- Added failure counts for captured measured-iteration errors.
+- Updated CLI, examples, tests, release notes, and docs for `0.5.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added async and endpoint benchmark support.
+
+## Risk
+
+- Medium-low. New APIs are additive, and existing sync behavior remains the
+  default.
+
+## Linked Issues
+
+Closes #10
+Closes #11
+Closes #12
+```

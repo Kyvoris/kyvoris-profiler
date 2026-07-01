@@ -12,6 +12,7 @@ def _metric_rows(summary: ProfileSummary) -> list[tuple[str, str]]:
     rows = [
         ("Iterations", str(summary.iterations)),
         ("Warmup", str(summary.warmup_iterations)),
+        ("Failures", str(summary.failed_iterations)),
         ("Average", f"{summary.average_ms:.3f} ms"),
         ("Minimum", f"{summary.min_ms:.3f} ms"),
         ("Maximum", f"{summary.max_ms:.3f} ms"),

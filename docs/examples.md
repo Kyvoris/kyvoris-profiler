@@ -103,6 +103,35 @@ kyvoris-profiler examples.run_demo:simulated_inference --format json --output re
 
 See [cli.md](cli.md) for the full command reference.
 
+## Async Inference Demo
+
+Version `0.5.0` adds async callable profiling:
+
+```powershell
+$env:PYTHONPATH="src"
+python examples\run_async_demo.py
+```
+
+The CLI automatically detects async targets:
+
+```powershell
+python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
+```
+
+## HTTP Endpoint Demo
+
+Use `profile_http_endpoint()` for simple dependency-free endpoint checks:
+
+```python
+from kyvoris_profiler import profile_http_endpoint
+
+result = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
+```
+
+The endpoint helper is intentionally lightweight. For authenticated, streaming,
+or framework-specific clients, wrap your own no-argument callable and pass it to
+`profile_callable()` or `profile_async_callable()`.
+
 ## Reading the Output
 
 Example output:
@@ -112,6 +141,7 @@ Real Model Inference Benchmark
 ------------------------------
 Iterations: 10
 Warmup: 1
+Failures: 0
 Average: 32.415 ms
 Minimum: 29.880 ms
 Maximum: 41.203 ms

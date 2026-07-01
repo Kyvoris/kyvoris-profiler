@@ -15,6 +15,10 @@
 
 - 
 
+## AI Assistance
+
+- Used for drafting or implementation support; reviewed and tested by the maintainer.
+
 ## Linked Issues
 
 Closes #

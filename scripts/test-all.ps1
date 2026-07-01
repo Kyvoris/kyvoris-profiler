@@ -49,6 +49,10 @@ Invoke-Step "Simulated inference example" {
     python examples\run_demo.py
 }
 
+Invoke-Step "Async inference example" {
+    python examples\run_async_demo.py
+}
+
 Invoke-Step "Inline profile_callable smoke test" {
     python -c "from kyvoris_profiler import profile_callable, format_text_report; r=profile_callable(lambda: [x for x in range(1000)], iterations=3, warmup=1, collect_cpu=True, collect_memory=True); print(format_text_report(r))"
 }
@@ -59,6 +63,10 @@ Invoke-Step "CLI module smoke test" {
 
 Invoke-Step "CLI JSON output smoke test" {
     python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
+}
+
+Invoke-Step "CLI async target smoke test" {
+    python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 }
 
 if ($InstallHuggingFace) {

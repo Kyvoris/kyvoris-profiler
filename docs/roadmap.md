@@ -12,6 +12,9 @@ currently focused on a small, dependable core before adding heavier integrations
 - Optional process CPU time metrics.
 - Optional peak Python-traced memory metrics.
 - CLI entry point for no-argument `module:function` targets.
+- Async callable profiling.
+- Simple HTTP endpoint profiling.
+- Failed iteration counts for captured exceptions.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Minimal dependency footprint.
@@ -35,7 +38,6 @@ currently focused on a small, dependable core before adding heavier integrations
 ### 3. Benchmark Controls
 
 - Configurable run labels and metadata.
-- Optional exception capture for failed iterations.
 - Support for benchmarking callables with arguments.
 - CLI support for callable arguments and richer target configuration.
 

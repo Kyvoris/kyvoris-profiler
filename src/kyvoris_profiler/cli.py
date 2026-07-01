@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
+import inspect
 import importlib
 import os
 import sys
@@ -10,7 +12,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
-from kyvoris_profiler import __version__, profile_callable
+from kyvoris_profiler import __version__, profile_async_callable, profile_callable
 from kyvoris_profiler.report import (
     format_html_report,
     format_json_report,
@@ -106,13 +108,16 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     try:
         callable_obj = load_callable(args.target)
-        summary = profile_callable(
-            callable_obj,
-            iterations=args.iterations,
-            warmup=args.warmup,
-            collect_cpu=args.collect_cpu,
-            collect_memory=args.collect_memory,
-        )
+        profile_kwargs = {
+            "iterations": args.iterations,
+            "warmup": args.warmup,
+            "collect_cpu": args.collect_cpu,
+            "collect_memory": args.collect_memory,
+        }
+        if inspect.iscoroutinefunction(callable_obj):
+            summary = asyncio.run(profile_async_callable(callable_obj, **profile_kwargs))
+        else:
+            summary = profile_callable(callable_obj, **profile_kwargs)
     except Exception as exc:
         parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
 

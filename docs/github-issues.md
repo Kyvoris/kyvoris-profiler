@@ -16,6 +16,42 @@ implementation starts.
 - `release:0.2.0`
 - `release:0.3.0`
 - `release:0.4.0`
+- `release:0.5.0`
+
+## 0.5.0 Issues
+
+### Add Async Callable Profiling
+
+**Problem:** Many inference clients and endpoint SDKs are async-first.
+
+**Acceptance criteria:**
+
+- Public `profile_async_callable()` API exists.
+- Public `benchmark_async_callable()` convenience API exists.
+- Reports use the existing `ProfileSummary` shape.
+- Tests cover async latency and resource profiling.
+
+### Add Endpoint Profiling Helper
+
+**Problem:** Users need a quick way to profile a simple HTTP endpoint without
+writing request boilerplate.
+
+**Acceptance criteria:**
+
+- Public `profile_http_endpoint()` API exists.
+- Implementation uses the standard library.
+- Tests use a local HTTP server rather than a public network dependency.
+
+### Add Failure Counts
+
+**Problem:** Endpoint-like workloads can have intermittent failures, and users
+need visibility into those failures without losing successful measurements.
+
+**Acceptance criteria:**
+
+- `continue_on_error=True` captures failed measured iterations.
+- `ProfileSummary` includes `failed_iterations`.
+- Reports include failure count.
 
 ## 0.4.0 Issues
 

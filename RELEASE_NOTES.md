@@ -1,5 +1,33 @@
 # Release Notes
 
+## 0.5.0
+
+`0.5.0` adds async and endpoint profiling for modern inference workflows.
+
+### Added
+
+- `profile_async_callable()` for no-argument async callables.
+- `benchmark_async_callable()` as the async latency-only convenience API.
+- `profile_http_endpoint()` for simple dependency-free HTTP endpoint profiling.
+- `failed_iterations` on `ProfileSummary`.
+- `continue_on_error=True` support for sync and async profiling.
+- Async demo and HTTP endpoint demo scripts.
+- CLI support for async `module:function` targets.
+- Tests for async profiling, failure capture, async CLI targets, and local HTTP
+  endpoint profiling.
+
+### Changed
+
+- Text, Markdown, JSON, and HTML reports now include failure count.
+- `scripts/test-all.ps1` now runs async example and async CLI smoke checks.
+- Project metadata version is now `0.5.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.4.1
 
 `0.4.1` patches the CLI release with smoother local testing and clearer test

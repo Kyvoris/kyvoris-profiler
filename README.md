@@ -7,9 +7,9 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.4.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.5.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
-> and a command-line interface. See
+> async workloads, HTTP endpoints, and a command-line interface. See
 > [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 
 ## Why Kyvoris Profiler?
@@ -22,6 +22,8 @@ measuring that repeated behavior.
 - Capture average, minimum, maximum, p50, and p95 latency.
 - Run warmup iterations before measured iterations.
 - Optionally collect process CPU time and peak Python memory allocations.
+- Profile async callables and simple HTTP endpoints.
+- Count failed measured iterations when exception capture is enabled.
 - Return typed summaries instead of loosely shaped dictionaries.
 - Generate plain-text, Markdown, JSON, or HTML reports.
 - Run benchmarks from the command line with `kyvoris-profiler`.
@@ -83,6 +85,7 @@ Inference Benchmark
 -------------------
 Iterations: 20
 Warmup: 2
+Failures: 0
 Average: 5.100 ms
 Minimum: 5.000 ms
 Maximum: 5.400 ms
@@ -123,6 +126,7 @@ Real Model Inference Benchmark
 ------------------------------
 Iterations: 10
 Warmup: 1
+Failures: 0
 Average: 32.415 ms
 Minimum: 29.880 ms
 Maximum: 41.203 ms
@@ -169,6 +173,34 @@ python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 5
 
 More CLI details are available in [docs/cli.md](docs/cli.md).
 
+## Async and Endpoint Examples
+
+Profile an async callable:
+
+```python
+import asyncio
+
+from kyvoris_profiler import format_text_report, profile_async_callable
+
+
+async def run_async_inference() -> str:
+    await asyncio.sleep(0.005)
+    return "ok"
+
+
+summary = asyncio.run(profile_async_callable(run_async_inference, iterations=10, warmup=1))
+print(format_text_report(summary, title="Async Benchmark"))
+```
+
+Profile a simple HTTP endpoint:
+
+```python
+from kyvoris_profiler import format_text_report, profile_http_endpoint
+
+summary = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
+print(format_text_report(summary, title="Endpoint Benchmark"))
+```
+
 ## API Overview
 
 ### `benchmark_callable(callable_obj, iterations=10, warmup=0)`
@@ -180,7 +212,7 @@ Warmup calls run before timing starts.
 summary = benchmark_callable(run_inference, iterations=10, warmup=1)
 ```
 
-### `profile_callable(callable_obj, iterations=10, warmup=0, collect_memory=False, collect_cpu=False)`
+### `profile_callable(callable_obj, iterations=10, warmup=0, collect_memory=False, collect_cpu=False, continue_on_error=False)`
 
 Runs the same benchmark loop as `benchmark_callable()`, with optional resource
 metrics:
@@ -198,6 +230,24 @@ summary = profile_callable(
 `collect_memory=True` records peak Python allocations observed by `tracemalloc`.
 It does not include GPU memory or every native allocation made by model
 frameworks. `collect_cpu=True` records process CPU time consumed by the callable.
+Use `continue_on_error=True` to keep measuring after failed iterations. Failed
+iterations are counted but excluded from latency and resource statistics.
+
+### `profile_async_callable(callable_obj, iterations=10, warmup=0, collect_memory=False, collect_cpu=False, continue_on_error=False)`
+
+Profiles a no-argument async callable and returns a `ProfileSummary`:
+
+```python
+summary = await profile_async_callable(run_async_inference, iterations=10, warmup=1)
+```
+
+### `profile_http_endpoint(url, iterations=10, warmup=0, method="GET", ...)`
+
+Profiles a simple HTTP endpoint using Python's standard library:
+
+```python
+summary = profile_http_endpoint("https://example.com", iterations=3, warmup=1)
+```
 
 The callable can wrap:
 
@@ -220,6 +270,7 @@ Immutable dataclass containing:
 | `p95_ms` | Slower-end latency often useful for user-facing performance |
 | `iterations` | Number of measured runs |
 | `warmup_iterations` | Number of untimed warmup runs before measurement |
+| `failed_iterations` | Failed measured iterations captured with `continue_on_error=True` |
 | `average_cpu_ms` | Average process CPU time when CPU collection is enabled |
 | `min_cpu_ms` | Minimum process CPU time when CPU collection is enabled |
 | `max_cpu_ms` | Maximum process CPU time when CPU collection is enabled |
@@ -263,12 +314,15 @@ kyvoris-profiler/
 |   |-- weekly-milestones.md
 |   `-- roadmap.md
 |-- examples/
+|   |-- run_async_demo.py
 |   |-- run_demo.py
+|   |-- run_endpoint_demo.py
 |   `-- run_model_demo.py
 |-- src/
 |   `-- kyvoris_profiler/
 |       |-- benchmark.py
 |       |-- cli.py
+|       |-- endpoint.py
 |       |-- metrics.py
 |       |-- report.py
 |       `-- __init__.py
@@ -314,6 +368,7 @@ directly:
 $env:PYTHONPATH="src"
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --warmup 1 --collect-cpu --collect-memory
 python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
+python -m kyvoris_profiler examples.run_async_demo:simulated_async_inference --iterations 3 --warmup 1
 ```
 
 After installing the package locally, test the console script:
@@ -345,13 +400,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1 -InstallHuggingF
 - Avoid provider lock-in; the callable wrapper decides what is being measured.
 - Keep optional model dependencies out of the core package.
 
+## Development Transparency
+
+Parts of this project were developed with assistance from AI coding tools. All
+changes are reviewed, tested, and accepted by the human maintainer before being
+committed.
+
 ## Roadmap
 
 Planned areas include:
 
 - CSV exports
 - benchmark labels and metadata
-- exception capture for failed iterations
 - support for callables with arguments
 - inference-specific metrics such as tokens per second and time to first token
 - native process, GPU, and framework-specific memory adapters

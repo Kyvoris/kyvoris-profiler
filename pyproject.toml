@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kyvoris-profiler"
-version = "0.4.1"
+version = "0.5.0"
 description = "Lightweight profiling utilities for AI inference workloads."
 readme = "README.md"
 requires-python = ">=3.10"

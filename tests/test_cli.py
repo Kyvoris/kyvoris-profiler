@@ -86,6 +86,24 @@ def test_cli_writes_json_report_to_file(tmp_path: Path) -> None:
     assert payload["metrics"]["peak_memory_kb"] is not None
 
 
+def test_cli_runs_async_target(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = run(
+        [
+            "tests.fixtures.cli_targets:async_target",
+            "--iterations",
+            "2",
+            "--warmup",
+            "1",
+        ]
+    )
+
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Iterations: 2" in output
+    assert "Warmup: 1" in output
+
+
 def test_cli_returns_error_for_missing_target(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc_info:
         run(["missing_target"])
