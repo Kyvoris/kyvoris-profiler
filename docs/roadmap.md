@@ -23,6 +23,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - Metadata and list output for benchmark history records.
 - Targeted history comparison by index or label.
 - History filtering by label, metadata, and latest count.
+- Saved history comparison presets.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -44,7 +45,7 @@ currently focused on a small, dependable core before adding heavier integrations
 
 - Stable schema documentation for downstream tooling.
 - Richer metadata for repeated benchmark runs.
-- Named baselines and saved comparison presets.
+- Clean packaging and release readiness checks.
 
 ### 3. Benchmark Controls
 

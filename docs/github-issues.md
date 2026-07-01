@@ -25,6 +25,31 @@ implementation starts.
 - `release:0.10.0`
 - `release:0.11.0`
 - `release:0.12.0`
+- `release:0.13.0`
+
+## 0.13.0 Issues
+
+### Add History Comparison Presets
+
+**Problem:** Teams repeat long history comparison commands in local workflows and
+CI jobs.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler.toml` supports `[history_presets.<name>]`.
+- Presets can configure history path, baseline, candidate, format, output, and
+  threshold settings.
+- Tests cover loading a named preset.
+
+### Add Preset CLI Support
+
+**Problem:** Users need to run saved history comparisons with a short command.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler history compare --preset NAME` works.
+- CLI flags override preset values.
+- Test runner includes a preset-based history comparison smoke check.
 
 ## 0.12.0 Issues
 

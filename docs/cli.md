@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.12.0` includes benchmark, comparison, threshold, TOML config, and
+Version `0.13.0` includes benchmark, comparison, threshold, TOML config, and
 history workflows:
 
 ```powershell
@@ -102,6 +102,7 @@ kyvoris-profiler history append reports\baseline.json --history reports\history.
 kyvoris-profiler history append reports\candidate.json --history reports\history.jsonl --label candidate --metadata model=roberta
 kyvoris-profiler history list --history reports\history.jsonl --metadata model=roberta --limit 5
 kyvoris-profiler history compare --history reports\history.jsonl --baseline latest:baseline --candidate latest:candidate --format markdown --output reports\history-selected-comparison.md
+kyvoris-profiler history compare --preset main_vs_candidate
 kyvoris-profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
 ```
 
@@ -159,6 +160,7 @@ Compare any two history records by 1-based index or unique label:
 kyvoris-profiler history compare --history <history.jsonl> --baseline 1 --candidate 3
 kyvoris-profiler history compare --history <history.jsonl> --baseline baseline --candidate candidate
 kyvoris-profiler history compare --history <history.jsonl> --baseline latest:baseline --candidate latest:candidate
+kyvoris-profiler history compare --preset main_vs_candidate
 ```
 
 | Option | Meaning |
@@ -171,6 +173,8 @@ kyvoris-profiler history compare --history <history.jsonl> --baseline latest:bas
 | `--limit N` | Show only the latest N matching records |
 | `--baseline SELECTOR` | Baseline selector for `history compare`; index or unique label |
 | `--candidate SELECTOR` | Candidate selector for `history compare`; index or unique label |
+| `--config PATH` | TOML config file for history presets |
+| `--preset NAME` | Named history comparison preset from `[history_presets]` |
 | `--format text` | Plain text comparison |
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |
@@ -199,6 +203,17 @@ title = "Benchmark Comparison"
 [thresholds]
 max_regression_percent = 5
 metrics = ["average_ms", "p95_ms", "failed_iterations"]
+fail_on_regression = true
+
+[history_presets.main_vs_candidate]
+history = "reports/history-smoke.jsonl"
+baseline = "latest:baseline"
+candidate = "latest:candidate"
+format = "markdown"
+output = "reports/history-preset-comparison-smoke.md"
+title = "Benchmark History Comparison"
+max_regression_percent = 100
+metrics = ["average_ms"]
 fail_on_regression = true
 ```
 

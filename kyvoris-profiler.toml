@@ -11,3 +11,14 @@ title = "Benchmark Comparison"
 max_regression_percent = 5
 metrics = ["average_ms", "p95_ms", "failed_iterations"]
 fail_on_regression = true
+
+[history_presets.main_vs_candidate]
+history = "reports/history-smoke.jsonl"
+baseline = "latest:baseline"
+candidate = "latest:candidate"
+format = "markdown"
+output = "reports/history-preset-comparison-smoke.md"
+title = "Benchmark History Comparison"
+max_regression_percent = 100
+metrics = ["average_ms"]
+fail_on_regression = true

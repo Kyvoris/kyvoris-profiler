@@ -89,6 +89,13 @@ release note draft.
 - Limit list output to the latest N matching records.
 - Add `latest:LABEL` selectors for comparisons.
 
+## Week 13: 0.13.0 History Presets
+
+- Add named history comparison presets to TOML config.
+- Support `history compare --preset NAME`.
+- Keep CLI flags as overrides for preset values.
+- Add preset smoke checks and documentation.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

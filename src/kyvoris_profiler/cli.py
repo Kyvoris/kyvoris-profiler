@@ -206,18 +206,25 @@ def build_history_parser() -> argparse.ArgumentParser:
     compare_parser.add_argument(
         "--history",
         type=Path,
-        default=Path("reports/history.jsonl"),
         help="History JSONL path. Default: reports/history.jsonl.",
     )
     compare_parser.add_argument(
         "--baseline",
-        required=True,
         help="Baseline record selector: 1-based index or unique label.",
     )
     compare_parser.add_argument(
         "--candidate",
-        required=True,
         help="Candidate record selector: 1-based index or unique label.",
+    )
+    compare_parser.add_argument(
+        "--config",
+        type=Path,
+        default=Path("kyvoris-profiler.toml"),
+        help="TOML config file for history presets. Default: kyvoris-profiler.toml.",
+    )
+    compare_parser.add_argument(
+        "--preset",
+        help="History comparison preset name from [history_presets].",
     )
     add_history_comparison_arguments(
         compare_parser,
@@ -250,7 +257,6 @@ def add_history_comparison_arguments(
     parser.add_argument(
         "--format",
         choices=sorted(COMPARISON_FORMATTERS),
-        default="text",
         help="Comparison report format. Default: text.",
     )
     parser.add_argument(
@@ -260,7 +266,6 @@ def add_history_comparison_arguments(
     )
     parser.add_argument(
         "--title",
-        default=default_title,
         help=f"Comparison report title. Default: {default_title}.",
     )
     parser.add_argument(
@@ -494,42 +499,94 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
             return 0
 
         if args.history_command == "compare":
+            preset_config = (
+                load_history_preset_config(args.config, args.preset)
+                if args.preset
+                else {}
+            )
+            history_path = (
+                args.history
+                or _optional_path(preset_config.get("history"))
+                or Path("reports/history.jsonl")
+            )
+            baseline_selector = args.baseline or _optional_str(
+                preset_config.get("baseline")
+            )
+            candidate_selector = args.candidate or _optional_str(
+                preset_config.get("candidate")
+            )
+            if baseline_selector is None or candidate_selector is None:
+                raise ValueError(
+                    "baseline and candidate selectors are required; "
+                    "pass --baseline/--candidate or use --preset"
+                )
+            output_format = args.format or str(preset_config.get("format", "text"))
+            if output_format not in COMPARISON_FORMATTERS:
+                raise ValueError(
+                    "format must be one of "
+                    + ", ".join(sorted(COMPARISON_FORMATTERS))
+                )
+            output_path = args.output or _optional_path(preset_config.get("output"))
+            title = args.title or str(
+                preset_config.get("title", "Benchmark History Comparison")
+            )
+            max_regression_percent = (
+                args.max_regression_percent
+                if args.max_regression_percent is not None
+                else preset_config.get("max_regression_percent")
+            )
+            threshold_metrics = (
+                args.threshold_metrics
+                if args.threshold_metrics is not None
+                else preset_config.get("metrics")
+            )
+            fail_on_regression = (
+                args.fail_on_regression
+                if args.fail_on_regression
+                else bool(preset_config.get("fail_on_regression", False))
+            )
             baseline_record, candidate_record = select_history_pair(
-                args.history,
-                args.baseline,
-                args.candidate,
+                history_path,
+                baseline_selector,
+                candidate_selector,
             )
             comparison, threshold_evaluation = build_history_comparison(
                 baseline_record,
                 candidate_record,
-                args,
+                max_regression_percent=max_regression_percent,
+                threshold_metrics=threshold_metrics,
             )
 
         elif args.history_command == "compare-latest":
             baseline_record, candidate_record = latest_pair(args.history)
+            output_format = args.format or "text"
+            output_path = args.output
+            title = args.title or "Benchmark History Comparison"
+            fail_on_regression = args.fail_on_regression
             comparison, threshold_evaluation = build_history_comparison(
                 baseline_record,
                 candidate_record,
-                args,
+                max_regression_percent=args.max_regression_percent,
+                threshold_metrics=args.threshold_metrics,
             )
         else:
             raise ValueError(f"unsupported history command: {args.history_command}")
     except Exception as exc:
         parser.exit(2, f"kyvoris-profiler: error: {exc}\n")
 
-    formatter = COMPARISON_FORMATTERS[args.format]
-    report = formatter(comparison, title=args.title)
+    formatter = COMPARISON_FORMATTERS[output_format]
+    report = formatter(comparison, title=title)
 
-    if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(report + "\n", encoding="utf-8")
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(report + "\n", encoding="utf-8")
     else:
         print(report)
 
     if threshold_evaluation is not None:
         threshold_exit_code = print_threshold_evaluation(
             threshold_evaluation,
-            fail_on_regression=args.fail_on_regression,
+            fail_on_regression=fail_on_regression,
         )
         if threshold_exit_code != 0:
             return threshold_exit_code
@@ -540,7 +597,9 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
 def build_history_comparison(
     baseline_record: object,
     candidate_record: object,
-    args: argparse.Namespace,
+    *,
+    max_regression_percent: object,
+    threshold_metrics: object,
 ) -> tuple[object, ThresholdEvaluation | None]:
     """Build a comparison and optional threshold evaluation for history records."""
     comparison = compare_profiles(
@@ -550,11 +609,11 @@ def build_history_comparison(
         candidate_label=candidate_record.label,
     )
     threshold_evaluation = None
-    if args.max_regression_percent is not None:
+    if max_regression_percent is not None:
         threshold_evaluation = evaluate_thresholds(
             comparison,
-            max_regression_percent=args.max_regression_percent,
-            metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
+            max_regression_percent=float(max_regression_percent),
+            metrics=set(threshold_metrics) if threshold_metrics else None,
         )
     return comparison, threshold_evaluation
 
@@ -628,6 +687,14 @@ def _optional_path(value: object) -> Path | None:
     return Path(value)
 
 
+def _optional_str(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError("string values in config must be strings")
+    return value
+
+
 def load_toml_config(path: Path) -> dict[str, object]:
     """Load a TOML config file."""
     return tomllib.loads(path.read_text(encoding="utf-8"))
@@ -655,6 +722,24 @@ def load_thresholds_config(path: Path) -> dict[str, object]:
     ):
         raise ValueError("thresholds.metrics must be a list of strings")
     return thresholds_config
+
+
+def load_history_preset_config(path: Path, preset_name: str) -> dict[str, object]:
+    """Load a named history comparison preset from a TOML config file."""
+    config = load_toml_config(path)
+    presets_config = config.get("history_presets", {})
+    if not isinstance(presets_config, dict):
+        raise ValueError("[history_presets] config must be a table")
+    preset_config = presets_config.get(preset_name)
+    if not isinstance(preset_config, dict):
+        raise ValueError(f"history preset not found: {preset_name}")
+    metrics = preset_config.get("metrics")
+    if metrics is not None and not (
+        isinstance(metrics, list)
+        and all(isinstance(metric, str) for metric in metrics)
+    ):
+        raise ValueError("history preset metrics must be a list of strings")
+    return preset_config
 
 
 def main() -> None:

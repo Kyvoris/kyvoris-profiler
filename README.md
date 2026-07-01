@@ -7,7 +7,7 @@ inference path actually take when it runs repeatedly? Wrap a model call, HTTP
 request, retrieval step, or any other no-argument Python callable, then get a
 typed latency summary and readable reports.
 
-> Project status: early alpha. Version `0.12.0` focuses on latency measurement,
+> Project status: early alpha. Version `0.13.0` focuses on latency measurement,
 > warmup-aware benchmarks, optional CPU and memory metrics, structured reports,
 > async workloads, HTTP endpoints, comparison reports, benchmark history, and a
 > command-line interface. See
@@ -260,7 +260,7 @@ Command-line arguments override values from the config file.
 
 ## Benchmark History Example
 
-Version `0.12.0` includes a lightweight JSONL history workflow for saved JSON
+Version `0.13.0` includes a lightweight JSONL history workflow for saved JSON
 summary reports with environment and custom metadata:
 
 ```powershell
@@ -268,6 +268,7 @@ python -m kyvoris_profiler history append reports\baseline.json --history report
 python -m kyvoris_profiler history append reports\candidate.json --history reports\history.jsonl --label candidate --metadata model=roberta
 python -m kyvoris_profiler history list --history reports\history.jsonl --metadata model=roberta --limit 5
 python -m kyvoris_profiler history compare --history reports\history.jsonl --baseline latest:baseline --candidate latest:candidate --format markdown --output reports\history-selected-comparison.md
+python -m kyvoris_profiler history compare --preset main_vs_candidate
 python -m kyvoris_profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
 ```
 
@@ -493,6 +494,7 @@ python -m kyvoris_profiler history list --history reports\history-smoke.jsonl
 python -m kyvoris_profiler history list --history reports\history-smoke.jsonl --metadata model=candidate-demo --limit 1
 python -m kyvoris_profiler history compare --history reports\history-smoke.jsonl --baseline 1 --candidate 2 --format markdown --output reports\history-selected-comparison-smoke.md
 python -m kyvoris_profiler history compare --history reports\history-smoke.jsonl --baseline latest:baseline --candidate latest:candidate --format markdown --output reports\history-latest-label-comparison-smoke.md
+python -m kyvoris_profiler history compare --preset main_vs_candidate
 python -m kyvoris_profiler history compare-latest --history reports\history-smoke.jsonl --format markdown --output reports\history-comparison-smoke.md
 ```
 

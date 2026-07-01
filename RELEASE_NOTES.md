@@ -1,5 +1,26 @@
 # Release Notes
 
+## 0.13.0
+
+`0.13.0` adds saved history comparison presets.
+
+### Added
+
+- `[history_presets]` support in `kyvoris-profiler.toml`.
+- `kyvoris-profiler history compare --preset NAME`.
+- CLI overrides for preset values such as format and output path.
+- Test runner coverage for preset-based history comparison.
+
+### Changed
+
+- Project metadata version is now `0.13.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.12.0
 
 `0.12.0` adds filtering for benchmark history and latest-label selectors.

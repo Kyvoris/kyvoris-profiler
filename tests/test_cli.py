@@ -8,7 +8,13 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from kyvoris_profiler.cli import format_history_list, load_callable, parse_metadata_args, run
+from kyvoris_profiler.cli import (
+    format_history_list,
+    load_callable,
+    load_history_preset_config,
+    parse_metadata_args,
+    run,
+)
 
 
 def test_hugging_face_demo_uses_three_default_models() -> None:
@@ -27,6 +33,27 @@ def test_parse_metadata_args_requires_key_value_pairs() -> None:
 
     with pytest.raises(ValueError):
         parse_metadata_args(["missing-separator"])
+
+
+def test_load_history_preset_config_reads_named_preset(tmp_path: Path) -> None:
+    config_path = tmp_path / "kyvoris-profiler.toml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "[history_presets.main_vs_candidate]",
+                'history = "reports/history.jsonl"',
+                'baseline = "latest:baseline"',
+                'candidate = "latest:candidate"',
+                'metrics = ["average_ms"]',
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    config = load_history_preset_config(config_path, "main_vs_candidate")
+
+    assert config["baseline"] == "latest:baseline"
+    assert config["metrics"] == ["average_ms"]
 
 
 def write_json_report(path: Path, average_ms: float) -> None:
@@ -817,6 +844,136 @@ def test_cli_history_compares_latest_label_selectors(tmp_path: Path) -> None:
     assert exit_code == 0
     assert "Baseline: `branch`" in output
     assert "Candidate: `main`" in output
+
+
+def test_cli_history_compare_reads_preset(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    history_path = tmp_path / "history.jsonl"
+    output_path = tmp_path / "preset-comparison.md"
+    config_path = tmp_path / "kyvoris-profiler.toml"
+    write_json_report(baseline_path, 10.0)
+    write_json_report(candidate_path, 9.0)
+
+    for report_path, label in [
+        (baseline_path, "baseline"),
+        (candidate_path, "candidate"),
+    ]:
+        assert (
+            run(
+                [
+                    "history",
+                    "append",
+                    str(report_path),
+                    "--history",
+                    str(history_path),
+                    "--label",
+                    label,
+                    "--no-environment-metadata",
+                ]
+            )
+            == 0
+        )
+
+    config_path.write_text(
+        "\n".join(
+            [
+                "[history_presets.main_vs_candidate]",
+                f'history = "{history_path.as_posix()}"',
+                'baseline = "latest:baseline"',
+                'candidate = "latest:candidate"',
+                'format = "markdown"',
+                f'output = "{output_path.as_posix()}"',
+                'max_regression_percent = 5',
+                'metrics = ["average_ms"]',
+                "fail_on_regression = true",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(
+        [
+            "history",
+            "compare",
+            "--config",
+            str(config_path),
+            "--preset",
+            "main_vs_candidate",
+        ]
+    )
+
+    output = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "Baseline: `baseline`" in output
+    assert "Candidate: `candidate`" in output
+
+
+def test_cli_history_compare_flags_override_preset(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path = tmp_path / "candidate.json"
+    history_path = tmp_path / "history.jsonl"
+    configured_output_path = tmp_path / "configured.md"
+    override_output_path = tmp_path / "override.json"
+    config_path = tmp_path / "kyvoris-profiler.toml"
+    write_json_report(baseline_path, 10.0)
+    write_json_report(candidate_path, 9.0)
+
+    for report_path, label in [
+        (baseline_path, "baseline"),
+        (candidate_path, "candidate"),
+    ]:
+        assert (
+            run(
+                [
+                    "history",
+                    "append",
+                    str(report_path),
+                    "--history",
+                    str(history_path),
+                    "--label",
+                    label,
+                    "--no-environment-metadata",
+                ]
+            )
+            == 0
+        )
+
+    config_path.write_text(
+        "\n".join(
+            [
+                "[history_presets.main_vs_candidate]",
+                f'history = "{history_path.as_posix()}"',
+                'baseline = "latest:baseline"',
+                'candidate = "latest:candidate"',
+                'format = "markdown"',
+                f'output = "{configured_output_path.as_posix()}"',
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run(
+        [
+            "history",
+            "compare",
+            "--config",
+            str(config_path),
+            "--preset",
+            "main_vs_candidate",
+            "--format",
+            "json",
+            "--output",
+            str(override_output_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert not configured_output_path.exists()
+    assert json.loads(override_output_path.read_text(encoding="utf-8"))[
+        "schema_version"
+    ] == "1.0"
 
 
 def test_format_history_list_includes_key_metadata(tmp_path: Path) -> None:

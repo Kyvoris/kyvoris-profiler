@@ -391,3 +391,32 @@ Closes #26
 Closes #27
 Closes #28
 ```
+
+## Example for 0.13.0
+
+```markdown
+## Summary
+
+- Added `[history_presets]` support in `kyvoris-profiler.toml`.
+- Added `kyvoris-profiler history compare --preset NAME`.
+- Updated tests, docs, release notes, and test runner coverage for `0.13.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added saved history comparison presets.
+
+## Risk
+
+- Low. Presets are additive and direct `history compare` flags still work.
+
+## Linked Issues
+
+Closes #29
+Closes #30
+```

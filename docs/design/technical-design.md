@@ -98,6 +98,13 @@ record label, metadata filters match flat `KEY=VALUE` pairs, and limit is applie
 after filters so users get the latest matching records. `latest:LABEL` is added
 as a small selector form instead of a broader query language.
 
+## 0.13.0 Design Decision
+
+History presets live under `[history_presets.<name>]` in the existing TOML config
+file. This avoids adding another configuration file and keeps CI commands short.
+CLI flags continue to override preset values so users can reuse a preset while
+changing output format or destination for one run.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.
