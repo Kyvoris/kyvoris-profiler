@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import os
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -30,6 +31,10 @@ def load_callable(target: str) -> Callable[[], Any]:
     module_name, separator, function_name = target.partition(":")
     if not separator or not module_name or not function_name:
         raise ValueError("target must use the format module:function")
+
+    cwd = os.getcwd()
+    if cwd not in sys.path:
+        sys.path.insert(0, cwd)
 
     module = importlib.import_module(module_name)
     callable_obj = getattr(module, function_name)

@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -15,6 +16,22 @@ def test_load_callable_imports_target() -> None:
 
     assert callable(callable_obj)
     assert callable_obj() == "ok"
+
+
+def test_load_callable_imports_target_from_current_directory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.chdir(repo_root)
+    monkeypatch.setattr(
+        sys,
+        "path",
+        [path for path in sys.path if Path(path or os.getcwd()).resolve() != repo_root],
+    )
+
+    callable_obj = load_callable("examples.run_demo:simulated_inference")
+
+    assert callable(callable_obj)
 
 
 def test_load_callable_rejects_invalid_target() -> None:

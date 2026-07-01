@@ -1,5 +1,32 @@
 # Release Notes
 
+## 0.4.1
+
+`0.4.1` patches the CLI release with smoother local testing and clearer test
+commands.
+
+### Added
+
+- `scripts/test-all.ps1` for running pytest, unittest, examples, inline
+  profiling, CLI smoke checks, and optional Hugging Face model checks.
+- README commands for direct CLI testing and the full test runner.
+- Regression test for loading CLI targets from the current working directory.
+
+### Fixed
+
+- CLI target loading now adds the current working directory to `sys.path`, so
+  repo-local targets such as `examples.run_demo:simulated_inference` work from
+  the project root.
+
+### Changed
+
+- Ignored generated `*.egg-info/` packaging metadata.
+- Project metadata version is now `0.4.1`.
+
+### Validation
+
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.4.0
 
 `0.4.0` adds a command-line interface for running Kyvoris Profiler without

@@ -295,6 +295,46 @@ Run the standard-library unittest checks:
 python -m unittest discover -s tests
 ```
 
+Run the project test runner:
+
+```powershell
+.\scripts\test-all.ps1
+```
+
+If PowerShell blocks local scripts on your machine, use a one-time bypass:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1
+```
+
+The test runner includes CLI coverage, but you can also run the CLI checks
+directly:
+
+```powershell
+$env:PYTHONPATH="src"
+python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --warmup 1 --collect-cpu --collect-memory
+python -m kyvoris_profiler examples.run_demo:simulated_inference --iterations 3 --format json --output reports\cli-smoke.json
+```
+
+After installing the package locally, test the console script:
+
+```powershell
+python -m pip install -e .
+kyvoris-profiler examples.run_demo:simulated_inference --iterations 3 --warmup 1 --collect-cpu --collect-memory
+```
+
+Include the optional Hugging Face model example:
+
+```powershell
+.\scripts\test-all.ps1 -IncludeHuggingFace
+```
+
+Install Hugging Face dependencies before running the model example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1 -InstallHuggingFace -IncludeHuggingFace
+```
+
 ## Design Principles
 
 - Keep the benchmark core small, explicit, and easy to audit.
