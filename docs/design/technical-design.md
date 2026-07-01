@@ -84,6 +84,13 @@ inspect, diff, and extend without schema migrations. Environment metadata is
 captured when appending from the CLI, while the history reader treats metadata
 as optional so 0.9.0 JSONL files remain valid.
 
+## 0.11.0 Design Decision
+
+Targeted history comparison uses simple selectors instead of adding a query
+language. Numeric selectors are 1-based indexes from `history list`; non-numeric
+selectors match unique labels. Duplicate labels are rejected for label-based
+selection so users do not accidentally compare the wrong records.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

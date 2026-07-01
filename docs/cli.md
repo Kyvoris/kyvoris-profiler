@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.10.0` includes benchmark, comparison, threshold, TOML config, and
+Version `0.11.0` includes benchmark, comparison, threshold, TOML config, and
 history workflows:
 
 ```powershell
@@ -101,6 +101,7 @@ latest two entries:
 kyvoris-profiler history append reports\baseline.json --history reports\history.jsonl --label baseline --metadata model=distilbert
 kyvoris-profiler history append reports\candidate.json --history reports\history.jsonl --label candidate --metadata model=roberta
 kyvoris-profiler history list --history reports\history.jsonl
+kyvoris-profiler history compare --history reports\history.jsonl --baseline baseline --candidate candidate --format markdown --output reports\history-selected-comparison.md
 kyvoris-profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
 ```
 
@@ -150,12 +151,21 @@ Compare the latest two history records:
 kyvoris-profiler history compare-latest --history <history.jsonl> [options]
 ```
 
+Compare any two history records by 1-based index or unique label:
+
+```powershell
+kyvoris-profiler history compare --history <history.jsonl> --baseline 1 --candidate 3
+kyvoris-profiler history compare --history <history.jsonl> --baseline baseline --candidate candidate
+```
+
 | Option | Meaning |
 | --- | --- |
 | `--history PATH` | History JSONL file. Default: `reports/history.jsonl` |
 | `--label TEXT` | Label used when appending a record |
 | `--metadata KEY=VALUE` | Metadata stored on append; can be passed multiple times |
 | `--no-environment-metadata` | Skip automatic Python, platform, and git metadata |
+| `--baseline SELECTOR` | Baseline selector for `history compare`; index or unique label |
+| `--candidate SELECTOR` | Candidate selector for `history compare`; index or unique label |
 | `--format text` | Plain text comparison |
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |

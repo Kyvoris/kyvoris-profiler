@@ -75,6 +75,13 @@ release note draft.
 - Add `history list` for inspecting saved records.
 - Keep older history files readable.
 
+## Week 11: 0.11.0 Targeted History Comparison
+
+- Select history records by index or unique label.
+- Add `history compare` for selected records.
+- Reuse comparison output formats and threshold checks.
+- Keep `history compare-latest` as a shortcut.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

@@ -332,3 +332,33 @@ Closes #22
 Closes #23
 Closes #24
 ```
+
+## Example for 0.11.0
+
+```markdown
+## Summary
+
+- Added history record selection by index or unique label.
+- Added `kyvoris-profiler history compare`.
+- Updated tests, docs, release notes, and test runner coverage for `0.11.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added targeted benchmark history comparisons.
+
+## Risk
+
+- Low. The new command is additive and `history compare-latest` remains
+  unchanged.
+
+## Linked Issues
+
+Closes #25
+Closes #26
+```

@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.10.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.11.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -166,6 +166,16 @@ Invoke-Step "CLI history list smoke test" {
 Invoke-Step "CLI history list output validation" {
     Assert-FileContains "reports\history-list-smoke.txt" "Index | Timestamp | Label | Average | P95 | Metadata"
     Assert-FileContains "reports\history-list-smoke.txt" "model=baseline-demo"
+}
+
+Invoke-Step "CLI selected history comparison smoke test" {
+    python -m kyvoris_profiler history compare --history reports\history-smoke.jsonl --baseline 1 --candidate 2 --format markdown --output reports\history-selected-comparison-smoke.md
+}
+
+Invoke-Step "CLI selected history comparison validation" {
+    Assert-FileContains "reports\history-selected-comparison-smoke.md" "Benchmark History Comparison"
+    Assert-FileContains "reports\history-selected-comparison-smoke.md" 'Baseline: `baseline`'
+    Assert-FileContains "reports\history-selected-comparison-smoke.md" 'Candidate: `candidate`'
 }
 
 Invoke-Step "CLI history comparison smoke test" {

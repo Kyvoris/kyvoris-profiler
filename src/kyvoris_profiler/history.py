@@ -128,6 +128,46 @@ def latest_pair(history_path: Path) -> tuple[HistoryRecord, HistoryRecord]:
     return records[-2], records[-1]
 
 
+def select_history_record(
+    records: list[HistoryRecord],
+    selector: str,
+) -> HistoryRecord:
+    """Select a history record by 1-based index or label."""
+    if not records:
+        raise ValueError("history contains no records")
+
+    try:
+        index = int(selector)
+    except ValueError:
+        matches = [record for record in records if record.label == selector]
+        if not matches:
+            raise ValueError(f"history label not found: {selector}")
+        if len(matches) > 1:
+            raise ValueError(
+                f"history label is ambiguous: {selector}; use an index instead"
+            )
+        return matches[0]
+
+    if index < 1 or index > len(records):
+        raise ValueError(
+            f"history index out of range: {index}; expected 1..{len(records)}"
+        )
+    return records[index - 1]
+
+
+def select_history_pair(
+    history_path: Path,
+    baseline_selector: str,
+    candidate_selector: str,
+) -> tuple[HistoryRecord, HistoryRecord]:
+    """Return selected baseline and candidate records from a history file."""
+    records = read_history(history_path)
+    return (
+        select_history_record(records, baseline_selector),
+        select_history_record(records, candidate_selector),
+    )
+
+
 def collect_environment_metadata(cwd: Path | None = None) -> dict[str, str]:
     """Collect stable environment metadata for a benchmark history record."""
     metadata = {

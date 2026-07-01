@@ -23,6 +23,32 @@ implementation starts.
 - `release:0.8.0`
 - `release:0.9.0`
 - `release:0.10.0`
+- `release:0.11.0`
+
+## 0.11.0 Issues
+
+### Add Targeted History Selection
+
+**Problem:** Users need to compare older benchmark records without editing the
+history file or relying on the latest two entries.
+
+**Acceptance criteria:**
+
+- Public helpers can select history records by 1-based index.
+- Public helpers can select history records by unique label.
+- Ambiguous labels produce a clear error.
+
+### Add History Compare Command
+
+**Problem:** Users need a CLI command for comparing selected history records.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler history compare --baseline 1 --candidate 3` works.
+- `kyvoris-profiler history compare --baseline old --candidate new` works when
+  labels are unique.
+- Selected history comparison supports existing formats and threshold flags.
+- Test runner includes a selected history comparison smoke check.
 
 ## 0.10.0 Issues
 

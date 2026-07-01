@@ -23,6 +23,8 @@ from kyvoris_profiler.history import (
     latest_pair,
     read_history,
     read_summary_report,
+    select_history_pair,
+    select_history_record,
 )
 from kyvoris_profiler.metrics import (
     LatencySummary,
@@ -76,8 +78,10 @@ __all__ = [
     "profile_http_endpoint",
     "read_history",
     "read_summary_report",
+    "select_history_pair",
+    "select_history_record",
     "summarize_latencies",
     "summarize_profile",
 ]
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"

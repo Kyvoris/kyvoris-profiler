@@ -1,5 +1,26 @@
 # Release Notes
 
+## 0.11.0
+
+`0.11.0` adds targeted benchmark history comparisons.
+
+### Added
+
+- Public history selection helpers for selecting records by index or label.
+- `kyvoris-profiler history compare` for comparing any two saved records.
+- CLI support for `--baseline` and `--candidate` history selectors.
+- Test runner coverage for selected history comparison output.
+
+### Changed
+
+- Project metadata version is now `0.11.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.10.0
 
 `0.10.0` improves benchmark history with metadata and list output.

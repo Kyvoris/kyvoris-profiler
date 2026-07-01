@@ -32,6 +32,8 @@ from kyvoris_profiler import (
     profile_callable,
     profile_http_endpoint,
     read_history,
+    select_history_pair,
+    select_history_record,
     summarize_latencies,
     summarize_profile,
 )
@@ -418,3 +420,26 @@ def test_collect_environment_metadata_includes_runtime_details() -> None:
     assert "python_version" in metadata
     assert "python_implementation" in metadata
     assert "platform" in metadata
+
+
+def test_history_records_can_be_selected_by_index_or_label(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    append_history_record(history_path, summarize_profile([1.0]), label="first")
+    append_history_record(history_path, summarize_profile([2.0]), label="second")
+    records = read_history(history_path)
+
+    assert select_history_record(records, "1").label == "first"
+    assert select_history_record(records, "second").summary.average_ms == 2.0
+    baseline, candidate = select_history_pair(history_path, "1", "second")
+
+    assert baseline.label == "first"
+    assert candidate.label == "second"
+
+
+def test_history_record_selection_rejects_ambiguous_labels(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    append_history_record(history_path, summarize_profile([1.0]), label="same")
+    append_history_record(history_path, summarize_profile([2.0]), label="same")
+
+    with pytest.raises(ValueError, match="ambiguous"):
+        select_history_pair(history_path, "same", "2")

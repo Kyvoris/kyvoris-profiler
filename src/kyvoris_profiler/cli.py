@@ -25,6 +25,7 @@ from kyvoris_profiler import (
     profile_async_callable,
     profile_callable,
     read_history,
+    select_history_pair,
 )
 from kyvoris_profiler.metrics import ProfileSummary
 from kyvoris_profiler.report import (
@@ -182,8 +183,8 @@ def build_history_parser() -> argparse.ArgumentParser:
     )
 
     compare_parser = subparsers.add_parser(
-        "compare-latest",
-        help="Compare the latest two records in a history file.",
+        "compare",
+        help="Compare two selected records in a history file.",
     )
     compare_parser.add_argument(
         "--history",
@@ -192,38 +193,75 @@ def build_history_parser() -> argparse.ArgumentParser:
         help="History JSONL path. Default: reports/history.jsonl.",
     )
     compare_parser.add_argument(
+        "--baseline",
+        required=True,
+        help="Baseline record selector: 1-based index or unique label.",
+    )
+    compare_parser.add_argument(
+        "--candidate",
+        required=True,
+        help="Candidate record selector: 1-based index or unique label.",
+    )
+    add_history_comparison_arguments(
+        compare_parser,
+        default_title="Benchmark History Comparison",
+    )
+
+    latest_parser = subparsers.add_parser(
+        "compare-latest",
+        help="Compare the latest two records in a history file.",
+    )
+    latest_parser.add_argument(
+        "--history",
+        type=Path,
+        default=Path("reports/history.jsonl"),
+        help="History JSONL path. Default: reports/history.jsonl.",
+    )
+    add_history_comparison_arguments(
+        latest_parser,
+        default_title="Benchmark History Comparison",
+    )
+    return parser
+
+
+def add_history_comparison_arguments(
+    parser: argparse.ArgumentParser,
+    *,
+    default_title: str,
+) -> None:
+    """Add shared history comparison arguments."""
+    parser.add_argument(
         "--format",
         choices=sorted(COMPARISON_FORMATTERS),
         default="text",
         help="Comparison report format. Default: text.",
     )
-    compare_parser.add_argument(
+    parser.add_argument(
         "--output",
         type=Path,
         help="Write comparison report to this path instead of stdout.",
     )
-    compare_parser.add_argument(
+    parser.add_argument(
         "--title",
-        default="Benchmark History Comparison",
-        help="Comparison report title. Default: Benchmark History Comparison.",
+        default=default_title,
+        help=f"Comparison report title. Default: {default_title}.",
     )
-    compare_parser.add_argument(
+    parser.add_argument(
         "--max-regression-percent",
         type=float,
         help="Allowed regression percentage before threshold violation.",
     )
-    compare_parser.add_argument(
+    parser.add_argument(
         "--threshold-metric",
         action="append",
         dest="threshold_metrics",
         help="Metric to evaluate against the threshold. Can be passed multiple times.",
     )
-    compare_parser.add_argument(
+    parser.add_argument(
         "--fail-on-regression",
         action="store_true",
         help="Exit with code 1 when threshold violations are found.",
     )
-    return parser
 
 
 def add_run_arguments(parser: argparse.ArgumentParser) -> None:
@@ -432,21 +470,25 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
             print(format_history_list(records))
             return 0
 
-        if args.history_command == "compare-latest":
-            baseline_record, candidate_record = latest_pair(args.history)
-            comparison = compare_profiles(
-                baseline_record.summary,
-                candidate_record.summary,
-                baseline_label=baseline_record.label,
-                candidate_label=candidate_record.label,
+        if args.history_command == "compare":
+            baseline_record, candidate_record = select_history_pair(
+                args.history,
+                args.baseline,
+                args.candidate,
             )
-            threshold_evaluation = None
-            if args.max_regression_percent is not None:
-                threshold_evaluation = evaluate_thresholds(
-                    comparison,
-                    max_regression_percent=args.max_regression_percent,
-                    metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
-                )
+            comparison, threshold_evaluation = build_history_comparison(
+                baseline_record,
+                candidate_record,
+                args,
+            )
+
+        elif args.history_command == "compare-latest":
+            baseline_record, candidate_record = latest_pair(args.history)
+            comparison, threshold_evaluation = build_history_comparison(
+                baseline_record,
+                candidate_record,
+                args,
+            )
         else:
             raise ValueError(f"unsupported history command: {args.history_command}")
     except Exception as exc:
@@ -470,6 +512,28 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
             return threshold_exit_code
 
     return 0
+
+
+def build_history_comparison(
+    baseline_record: object,
+    candidate_record: object,
+    args: argparse.Namespace,
+) -> tuple[object, ThresholdEvaluation | None]:
+    """Build a comparison and optional threshold evaluation for history records."""
+    comparison = compare_profiles(
+        baseline_record.summary,
+        candidate_record.summary,
+        baseline_label=baseline_record.label,
+        candidate_label=candidate_record.label,
+    )
+    threshold_evaluation = None
+    if args.max_regression_percent is not None:
+        threshold_evaluation = evaluate_thresholds(
+            comparison,
+            max_regression_percent=args.max_regression_percent,
+            metrics=set(args.threshold_metrics) if args.threshold_metrics else None,
+        )
+    return comparison, threshold_evaluation
 
 
 def parse_metadata_args(values: Sequence[str]) -> dict[str, str]:
