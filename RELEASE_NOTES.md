@@ -1,5 +1,29 @@
 # Release Notes
 
+## 0.10.0
+
+`0.10.0` improves benchmark history with metadata and list output.
+
+### Added
+
+- History records can store metadata alongside benchmark summaries.
+- `collect_environment_metadata()` captures Python, platform, and git commit
+  details when available.
+- `kyvoris-profiler history append --metadata KEY=VALUE`.
+- `kyvoris-profiler history append --no-environment-metadata`.
+- `kyvoris-profiler history list` for viewing saved records.
+- Test runner coverage for history list output.
+
+### Changed
+
+- Project metadata version is now `0.10.0`.
+
+### Validation
+
+- `python -m pytest`
+- `python -m unittest discover -s tests`
+- `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
 ## 0.9.0
 
 `0.9.0` adds benchmark history storage and latest-run comparison workflows.

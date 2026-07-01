@@ -19,10 +19,12 @@ from kyvoris_profiler import (
     __version__,
     append_history_from_report,
     compare_profiles,
+    collect_environment_metadata,
     evaluate_thresholds,
     latest_pair,
     profile_async_callable,
     profile_callable,
+    read_history,
 )
 from kyvoris_profiler.metrics import ProfileSummary
 from kyvoris_profiler.report import (
@@ -154,6 +156,29 @@ def build_history_parser() -> argparse.ArgumentParser:
         "--label",
         required=True,
         help="Label for the saved history record.",
+    )
+    append_parser.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="Metadata to store with the record. Can be passed multiple times.",
+    )
+    append_parser.add_argument(
+        "--no-environment-metadata",
+        action="store_true",
+        help="Do not add Python, platform, and git metadata automatically.",
+    )
+
+    list_parser = subparsers.add_parser(
+        "list",
+        help="List saved benchmark history records.",
+    )
+    list_parser.add_argument(
+        "--history",
+        type=Path,
+        default=Path("reports/history.jsonl"),
+        help="History JSONL path. Default: reports/history.jsonl.",
     )
 
     compare_parser = subparsers.add_parser(
@@ -384,15 +409,27 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
     """Run a benchmark history command."""
     try:
         if args.history_command == "append":
+            metadata = parse_metadata_args(args.metadata)
+            if not args.no_environment_metadata:
+                metadata = {
+                    **collect_environment_metadata(Path.cwd()),
+                    **metadata,
+                }
             record = append_history_from_report(
                 args.history,
                 args.report,
                 label=args.label,
+                metadata=metadata,
             )
             print(
                 f"Appended history record: {record.label} "
                 f"({record.timestamp}) -> {args.history}"
             )
+            return 0
+
+        if args.history_command == "list":
+            records = read_history(args.history)
+            print(format_history_list(records))
             return 0
 
         if args.history_command == "compare-latest":
@@ -433,6 +470,40 @@ def run_history(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
             return threshold_exit_code
 
     return 0
+
+
+def parse_metadata_args(values: Sequence[str]) -> dict[str, str]:
+    """Parse KEY=VALUE metadata CLI arguments."""
+    metadata: dict[str, str] = {}
+    for value in values:
+        key, separator, metadata_value = value.partition("=")
+        if not separator or not key:
+            raise ValueError("metadata must use KEY=VALUE format")
+        metadata[key] = metadata_value
+    return metadata
+
+
+def format_history_list(records: Sequence[object]) -> str:
+    """Format history records for terminal output."""
+    if not records:
+        return "No history records found."
+
+    lines = ["Index | Timestamp | Label | Average | P95 | Metadata"]
+    for index, record in enumerate(records, start=1):
+        metadata = getattr(record, "metadata", None) or {}
+        metadata_text = ", ".join(
+            f"{key}={value}"
+            for key, value in sorted(metadata.items())
+            if key in {"git_commit", "model", "version", "python_version", "platform"}
+        )
+        if not metadata_text:
+            metadata_text = "-"
+        lines.append(
+            f"{index} | {record.timestamp} | {record.label} | "
+            f"{record.summary.average_ms:.3f} ms | "
+            f"{record.summary.p95_ms:.3f} ms | {metadata_text}"
+        )
+    return "\n".join(lines)
 
 
 def print_threshold_evaluation(

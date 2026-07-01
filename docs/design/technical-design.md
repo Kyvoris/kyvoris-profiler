@@ -77,6 +77,13 @@ source path, and normalized `ProfileSummary` metrics. The first history command
 compares only the latest two records, keeping the workflow small while reusing
 the existing comparison report and threshold logic.
 
+## 0.10.0 Design Decision
+
+History metadata is stored as a flat string dictionary so it remains easy to
+inspect, diff, and extend without schema migrations. Environment metadata is
+captured when appending from the CLI, while the history reader treats metadata
+as optional so 0.9.0 JSONL files remain valid.
+
 ## Public API Principles
 
 - Keep callable benchmarking simple and dependency-free.

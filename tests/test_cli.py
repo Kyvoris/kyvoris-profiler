@@ -8,7 +8,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from kyvoris_profiler.cli import load_callable, run
+from kyvoris_profiler.cli import format_history_list, load_callable, parse_metadata_args, run
 
 
 def test_hugging_face_demo_uses_three_default_models() -> None:
@@ -17,6 +17,16 @@ def test_hugging_face_demo_uses_three_default_models() -> None:
     assert len(MODEL_NAMES) == 3
     assert len(set(MODEL_NAMES)) == 3
     assert "cardiffnlp/twitter-roberta-base-sentiment-latest" in MODEL_NAMES
+
+
+def test_parse_metadata_args_requires_key_value_pairs() -> None:
+    assert parse_metadata_args(["model=distilbert", "version=0.10.0"]) == {
+        "model": "distilbert",
+        "version": "0.10.0",
+    }
+
+    with pytest.raises(ValueError):
+        parse_metadata_args(["missing-separator"])
 
 
 def write_json_report(path: Path, average_ms: float) -> None:
@@ -518,6 +528,9 @@ def test_cli_history_appends_and_compares_latest_records(tmp_path: Path) -> None
                 str(history_path),
                 "--label",
                 "before",
+                "--metadata",
+                "model=old-model",
+                "--no-environment-metadata",
             ]
         )
         == 0
@@ -532,6 +545,9 @@ def test_cli_history_appends_and_compares_latest_records(tmp_path: Path) -> None
                 str(history_path),
                 "--label",
                 "after",
+                "--metadata",
+                "model=new-model",
+                "--no-environment-metadata",
             ]
         )
         == 0
@@ -557,6 +573,52 @@ def test_cli_history_appends_and_compares_latest_records(tmp_path: Path) -> None
     assert "Baseline: `before`" in output
     assert "Candidate: `after`" in output
     assert "| average_ms |" in output
+
+
+def test_cli_history_lists_saved_records(tmp_path: Path) -> None:
+    report_path = tmp_path / "report.json"
+    history_path = tmp_path / "history.jsonl"
+    write_json_report(report_path, 10.0)
+    assert (
+        run(
+            [
+                "history",
+                "append",
+                str(report_path),
+                "--history",
+                str(history_path),
+                "--label",
+                "main",
+                "--metadata",
+                "model=demo",
+                "--no-environment-metadata",
+            ]
+        )
+        == 0
+    )
+
+    exit_code = run(["history", "list", "--history", str(history_path)])
+
+    assert exit_code == 0
+
+
+def test_format_history_list_includes_key_metadata(tmp_path: Path) -> None:
+    from kyvoris_profiler import append_history_record, read_history, summarize_profile
+
+    history_path = tmp_path / "history.jsonl"
+    append_history_record(
+        history_path,
+        summarize_profile([10.0]),
+        label="main",
+        metadata={"model": "demo", "ignored": "value"},
+    )
+
+    output = format_history_list(read_history(history_path))
+
+    assert "Index | Timestamp | Label | Average | P95 | Metadata" in output
+    assert "main" in output
+    assert "model=demo" in output
+    assert "ignored=value" not in output
 
 
 def test_cli_history_threshold_failure_returns_nonzero(tmp_path: Path) -> None:

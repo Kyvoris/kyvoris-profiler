@@ -65,7 +65,7 @@ Write-Host "Repo: $repoRoot"
 Write-Host "PYTHONPATH: $env:PYTHONPATH"
 
 Invoke-Step "Package version check" {
-    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.9.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
+    python -c "import kyvoris_profiler; assert kyvoris_profiler.__version__ == '0.10.0', kyvoris_profiler.__version__; print(kyvoris_profiler.__version__)"
 }
 
 Invoke-Step "Pytest suite" {
@@ -155,8 +155,17 @@ Invoke-Step "CLI comparison CSV output validation" {
 
 Invoke-Step "CLI history append smoke test" {
     Remove-Item -LiteralPath reports\history-smoke.jsonl -ErrorAction SilentlyContinue
-    python -m kyvoris_profiler history append reports\baseline-smoke.json --history reports\history-smoke.jsonl --label baseline
-    python -m kyvoris_profiler history append reports\candidate-smoke.json --history reports\history-smoke.jsonl --label candidate
+    python -m kyvoris_profiler history append reports\baseline-smoke.json --history reports\history-smoke.jsonl --label baseline --metadata model=baseline-demo
+    python -m kyvoris_profiler history append reports\candidate-smoke.json --history reports\history-smoke.jsonl --label candidate --metadata model=candidate-demo
+}
+
+Invoke-Step "CLI history list smoke test" {
+    python -m kyvoris_profiler history list --history reports\history-smoke.jsonl | Tee-Object -FilePath reports\history-list-smoke.txt
+}
+
+Invoke-Step "CLI history list output validation" {
+    Assert-FileContains "reports\history-list-smoke.txt" "Index | Timestamp | Label | Average | P95 | Metadata"
+    Assert-FileContains "reports\history-list-smoke.txt" "model=baseline-demo"
 }
 
 Invoke-Step "CLI history comparison smoke test" {

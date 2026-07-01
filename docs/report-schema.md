@@ -127,6 +127,13 @@ Each line is a standalone JSON object:
 {
   "label": "main",
   "source": "reports/summary.json",
+  "metadata": {
+    "git_commit": "38e6845",
+    "model": "distilbert",
+    "platform": "Windows-11-10.0.26100-SP0",
+    "python_implementation": "CPython",
+    "python_version": "3.13.14"
+  },
   "summary": {
     "average_ms": 5.1,
     "min_ms": 5.0,
@@ -147,4 +154,6 @@ Each line is a standalone JSON object:
 
 History records intentionally store the normalized `ProfileSummary` metrics, not
 the original report title. Use `label` to identify the branch, model, version,
-or run being compared.
+or run being compared. `metadata` is an object of string key/value pairs. New
+records include environment metadata by default; older history records without
+metadata are still valid.

@@ -1,6 +1,6 @@
 # CLI
 
-Version `0.9.0` includes benchmark, comparison, threshold, TOML config, and
+Version `0.10.0` includes benchmark, comparison, threshold, TOML config, and
 history workflows:
 
 ```powershell
@@ -94,11 +94,13 @@ CLI arguments override config values:
 kyvoris-profiler compare --config kyvoris-profiler.toml --format html --output reports\comparison.html
 ```
 
-Append saved JSON reports to a history file and compare the latest two entries:
+Append saved JSON reports to a history file, list saved records, and compare the
+latest two entries:
 
 ```powershell
-kyvoris-profiler history append reports\baseline.json --history reports\history.jsonl --label baseline
-kyvoris-profiler history append reports\candidate.json --history reports\history.jsonl --label candidate
+kyvoris-profiler history append reports\baseline.json --history reports\history.jsonl --label baseline --metadata model=distilbert
+kyvoris-profiler history append reports\candidate.json --history reports\history.jsonl --label candidate --metadata model=roberta
+kyvoris-profiler history list --history reports\history.jsonl
 kyvoris-profiler history compare-latest --history reports\history.jsonl --format markdown --output reports\history-comparison.md
 ```
 
@@ -132,6 +134,16 @@ Append a summary JSON report:
 kyvoris-profiler history append <report.json> --history <history.jsonl> --label <label>
 ```
 
+By default, appended records include Python, platform, and git commit metadata
+when available. Add custom metadata with `--metadata KEY=VALUE`, or use
+`--no-environment-metadata` to store only explicit values.
+
+List records:
+
+```powershell
+kyvoris-profiler history list --history <history.jsonl>
+```
+
 Compare the latest two history records:
 
 ```powershell
@@ -142,6 +154,8 @@ kyvoris-profiler history compare-latest --history <history.jsonl> [options]
 | --- | --- |
 | `--history PATH` | History JSONL file. Default: `reports/history.jsonl` |
 | `--label TEXT` | Label used when appending a record |
+| `--metadata KEY=VALUE` | Metadata stored on append; can be passed multiple times |
+| `--no-environment-metadata` | Skip automatic Python, platform, and git metadata |
 | `--format text` | Plain text comparison |
 | `--format markdown` | Markdown comparison |
 | `--format json` | JSON comparison |

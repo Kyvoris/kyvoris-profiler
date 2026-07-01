@@ -20,6 +20,7 @@ currently focused on a small, dependable core before adding heavier integrations
 - CI threshold evaluation for comparison reports.
 - TOML configuration for repeatable comparison threshold settings.
 - JSONL benchmark history for saved summary reports.
+- Metadata and list output for benchmark history records.
 - Demo scripts for simulated inference and optional Hugging Face model inference.
 - Example documentation for simulated and real-model benchmark runs.
 - Detailed metric interpretation documentation.
@@ -41,6 +42,7 @@ currently focused on a small, dependable core before adding heavier integrations
 
 - Stable schema documentation for downstream tooling.
 - Richer metadata for repeated benchmark runs.
+- Compare specific history records by index or label.
 
 ### 3. Benchmark Controls
 

@@ -68,6 +68,13 @@ release note draft.
 - Reuse comparison report formats and threshold checks for history.
 - Add test runner coverage and schema documentation.
 
+## Week 10: 0.10.0 History Metadata
+
+- Add metadata to JSONL history records.
+- Capture Python, platform, and git commit metadata when available.
+- Add `history list` for inspecting saved records.
+- Keep older history files readable.
+
 ## Long-Term Cadence
 
 - Keep weekly work small enough to review.

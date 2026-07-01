@@ -14,6 +14,7 @@ from kyvoris_profiler import (
     append_history_from_report,
     append_history_record,
     benchmark_callable,
+    collect_environment_metadata,
     compare_profiles,
     evaluate_thresholds,
     format_comparison_csv_report,
@@ -352,14 +353,21 @@ def test_history_records_can_be_appended_and_read(tmp_path: Path) -> None:
     baseline = summarize_profile([10.0, 11.0, 12.0])
     candidate = summarize_profile([9.0, 10.0, 11.0])
 
-    append_history_record(history_path, baseline, label="baseline")
+    append_history_record(
+        history_path,
+        baseline,
+        label="baseline",
+        metadata={"model": "old-model"},
+    )
     append_history_record(history_path, candidate, label="candidate")
 
     records = read_history(history_path)
 
     assert [record.label for record in records] == ["baseline", "candidate"]
     assert records[0].summary.average_ms == 11.0
+    assert records[0].metadata == {"model": "old-model"}
     assert records[1].summary.average_ms == 10.0
+    assert records[1].metadata == {}
 
 
 def test_history_can_append_from_json_report(tmp_path: Path) -> None:
@@ -379,8 +387,34 @@ def test_history_can_append_from_json_report(tmp_path: Path) -> None:
         history_path,
         report_path,
         label="main",
+        metadata={"version": "0.10.0"},
     )
 
     assert record.label == "main"
     assert record.source == str(report_path)
+    assert record.metadata == {"version": "0.10.0"}
     assert read_history(history_path)[0].summary.average_ms == 2.0
+
+
+def test_history_reads_older_records_without_metadata(tmp_path: Path) -> None:
+    history_path = tmp_path / "history.jsonl"
+    payload = {
+        "timestamp": "2026-07-01T00:00:00+00:00",
+        "label": "old",
+        "source": None,
+        "summary": summarize_profile([1.0]).as_dict(),
+    }
+    history_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    record = read_history(history_path)[0]
+
+    assert record.label == "old"
+    assert record.metadata == {}
+
+
+def test_collect_environment_metadata_includes_runtime_details() -> None:
+    metadata = collect_environment_metadata()
+
+    assert "python_version" in metadata
+    assert "python_implementation" in metadata
+    assert "platform" in metadata

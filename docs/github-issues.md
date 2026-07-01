@@ -22,6 +22,33 @@ implementation starts.
 - `release:0.7.1`
 - `release:0.8.0`
 - `release:0.9.0`
+- `release:0.10.0`
+
+## 0.10.0 Issues
+
+### Add History Metadata
+
+**Problem:** Saved benchmark records need context such as model name, Python
+version, platform, and git commit to make later comparisons meaningful.
+
+**Acceptance criteria:**
+
+- History records support a metadata object.
+- Append commands add environment metadata by default.
+- Users can add custom `KEY=VALUE` metadata.
+- Older history records without metadata still load.
+
+### Add History List Command
+
+**Problem:** Users need to inspect saved history records without opening JSONL
+files manually.
+
+**Acceptance criteria:**
+
+- `kyvoris-profiler history list` prints saved records.
+- Output includes index, timestamp, label, average latency, p95 latency, and key
+  metadata.
+- Test runner includes a history list smoke check.
 
 ## 0.9.0 Issues
 

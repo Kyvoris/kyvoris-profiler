@@ -302,3 +302,33 @@ Closes #20
 Closes #21
 Closes #22
 ```
+
+## Example for 0.10.0
+
+```markdown
+## Summary
+
+- Added metadata support for benchmark history records.
+- Added `kyvoris-profiler history list`.
+- Updated tests, docs, release notes, and test runner coverage for `0.10.0`.
+
+## Testing
+
+- [x] `python -m pytest`
+- [x] `python -m unittest discover -s tests`
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\test-all.ps1`
+
+## Release Notes
+
+- Added history metadata and list output.
+
+## Risk
+
+- Low. Metadata is additive and older history records without metadata still
+  load.
+
+## Linked Issues
+
+Closes #23
+Closes #24
+```
